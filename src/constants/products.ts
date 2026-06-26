@@ -1,4 +1,3 @@
-const getImg = (prompt: string) => `https://picsum.photos/seed/${encodeURIComponent(prompt)}/400/300`;
 
 export const productsData: Record<string, { name: string, price: string, image: string, tag?: string }[]> = {
   "Grocery Items": [
