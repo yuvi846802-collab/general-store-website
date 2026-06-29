@@ -54,9 +54,14 @@ export default function Footer() {
         </div>
         
         <div className="pt-8 border-t border-border/10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Hakeem Store. All rights reserved.
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-muted-foreground text-sm">
+              © {new Date().getFullYear()} Hakeem Store. All rights reserved.
+            </p>
+            <a href="/admin/login" className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground transition-colors cursor-default hover:cursor-pointer">
+              Admin Login
+            </a>
+          </div>
           <div className="text-muted-foreground text-sm">
             Proudly serving Naryawal
           </div>

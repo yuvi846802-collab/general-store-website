@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { Store, Phone, Menu, X, Search, User, ShoppingCart, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,8 +34,11 @@ export default function Navbar() {
         
         {/* Logo Section */}
         <a href="#hero" className="flex items-center gap-3 group">
-          <div className="p-2 rounded-xl bg-[#0a3a2a] text-white shadow-sm flex items-center justify-center">
-            <Store size={22} className="group-hover:scale-110 transition-transform duration-300" />
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 shadow-[0_0_20px_rgba(16,185,129,0.25)] shrink-0 group-hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all duration-300">
+            <span className="font-heading font-black text-white text-2xl tracking-tighter drop-shadow-md">H</span>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border shadow-sm">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+            </div>
           </div>
           <div className="flex flex-col">
             <span className="font-heading text-xl font-bold tracking-tight text-foreground leading-none">
@@ -70,6 +77,7 @@ export default function Navbar() {
 
           
           <button 
+            onClick={() => toast({ title: "Search", description: "Search feature coming soon!" })}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
             aria-label="Search products"
           >
@@ -77,6 +85,7 @@ export default function Navbar() {
           </button>
 
           <button 
+            onClick={() => setLocation("/admin/login")}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
             aria-label="User account"
           >
@@ -84,6 +93,7 @@ export default function Navbar() {
           </button>
 
           <button 
+            onClick={() => toast({ title: "Shopping Cart", description: "Your cart is currently empty." })}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors relative mr-2 focus:outline-none focus:ring-2 focus:ring-green-500"
             aria-label="Shopping cart with 2 items"
           >
@@ -106,7 +116,11 @@ export default function Navbar() {
 
         {/* Mobile menu button and Theme toggle */}
         <div className="flex items-center gap-3 lg:hidden">
-          <button className="relative p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full" aria-label="Shopping cart with 2 items">
+          <button 
+            onClick={() => toast({ title: "Shopping Cart", description: "Your cart is currently empty." })}
+            className="relative p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full" 
+            aria-label="Shopping cart with 2 items"
+          >
             <ShoppingCart size={20} />
             <span className="absolute top-1 right-1 w-4 h-4 bg-green-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-background" aria-hidden="true">
               2
