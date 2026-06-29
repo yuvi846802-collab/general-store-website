@@ -161,7 +161,8 @@ export default function AdminOrders() {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+                )))
+              }
             </tbody>
           </table>
         </div>

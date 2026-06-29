@@ -24,6 +24,7 @@ import AdminContentEditor from "@/pages/admin/ContentEditor";
 import AdminInventory from "@/pages/admin/Inventory";
 import AdminCoupons from "@/pages/admin/Coupons";
 import AdminMarketing from "@/pages/admin/Marketing";
+import AdminCreateEntity from "@/pages/admin/CreateEntity";
 
 import AdminLayout from "@/layouts/AdminLayout";
 const AuthProvider = lazy(() => import("@/context/AuthContext").then(m => ({ default: m.AuthProvider })));
@@ -45,6 +46,7 @@ function Router() {
           <AdminLayout>
             <Switch>
               <Route path="/admin/dashboard"><AdminDashboard /></Route>
+              <Route path="/admin/create/:entity"><AdminCreateEntity /></Route>
               <Route path="/admin/products/new"><AdminProductEditor /></Route>
               <Route path="/admin/products/:id"><AdminProductEditor /></Route>
               <Route path="/admin/products"><AdminProducts /></Route>

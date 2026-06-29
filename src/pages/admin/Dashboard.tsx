@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { useRealTimeData } from "@/hooks/useRealTimeData";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Package, Users, ShoppingCart, TrendingUp, DollarSign, 
@@ -38,6 +39,14 @@ export default function AdminDashboard() {
     staleTime: 60 * 1000, // Cache for 1 minute
     retry: 2,
   });
+
+  const updateTrigger = useRealTimeData('all');
+  
+  useEffect(() => {
+    if (updateTrigger > 0) {
+      refetch();
+    }
+  }, [updateTrigger, refetch]);
 
   const handleExport = () => {
     if (!data) return;

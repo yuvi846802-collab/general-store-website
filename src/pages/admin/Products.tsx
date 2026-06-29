@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
+import { useRealTimeData } from "@/hooks/useRealTimeData";
 import { productService, Product } from "@/services/productService";
-import { Plus, Search, Filter, Edit, Trash2, Download, Upload, MoreHorizontal, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Download, Upload, MoreHorizontal, CheckCircle2, XCircle, AlertCircle, Eye, Copy, Power } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { getImageUrl } from "@/lib/utils";
+import ImportProductsModal from "@/components/admin/ImportProductsModal";
+import ExportProductsModal from "@/components/admin/ExportProductsModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -11,8 +23,11 @@ export default function AdminProducts() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const updateTrigger = useRealTimeData('product');
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -28,7 +43,7 @@ export default function AdminProducts() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [updateTrigger]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Delete this product?")) {
@@ -86,10 +101,10 @@ export default function AdminProducts() {
           <p className="text-sm text-muted-foreground">Manage your store's inventory and catalog.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+          <button onClick={() => setIsImportOpen(true)} className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
             <Upload size={16} /> Import
           </button>
-          <button className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+          <button onClick={() => setIsExportOpen(true)} className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
             <Download size={16} /> Export
           </button>
           <button 
@@ -216,7 +231,7 @@ export default function AdminProducts() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-background border border-border p-1 flex items-center justify-center shrink-0 shadow-sm">
-                          <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
+                          <img src={getImageUrl(product.image)} alt={product.name} className="max-w-full max-h-full object-contain" />
                         </div>
                         <div>
                           <div className="font-semibold text-foreground text-sm hover:text-primary cursor-pointer transition-colors" onClick={() => setLocation(`/admin/products/${product.id}`)}>
@@ -254,9 +269,35 @@ export default function AdminProducts() {
                         <button onClick={() => handleDelete(product.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Delete">
                           <Trash2 size={16} />
                         </button>
-                        <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors" title="More Options">
-                          <MoreHorizontal size={16} />
-                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors" title="More Options">
+                              <MoreHorizontal size={16} />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setLocation(`/admin/products/${product.id}`)}>
+                              <Eye className="mr-2 h-4 w-4" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setLocation(`/admin/products/${product.id}`)}>
+                              <Edit className="mr-2 h-4 w-4" /> Edit Product
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              toast({ title: "Product duplicated successfully" });
+                            }}>
+                              <Copy className="mr-2 h-4 w-4" /> Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
+                              onClick={() => handleDelete(product.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete Product
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
@@ -278,6 +319,22 @@ export default function AdminProducts() {
           </div>
         </div>
       </div>
+
+      <ImportProductsModal 
+        isOpen={isImportOpen} 
+        onClose={() => setIsImportOpen(false)} 
+        onSuccess={() => {
+          setIsImportOpen(false);
+          fetchProducts();
+        }}
+      />
+      
+      <ExportProductsModal 
+        isOpen={isExportOpen} 
+        onClose={() => setIsExportOpen(false)} 
+        filteredProducts={filteredProducts}
+        allProducts={products}
+      />
     </div>
   );
 }

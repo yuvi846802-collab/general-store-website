@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { getImageUrl } from "@/lib/utils";
 
 export default function AboutSection() {
   return (
@@ -48,7 +49,7 @@ export default function AboutSection() {
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl translate-x-4 translate-y-4 -z-10" />
             <div className="bg-card rounded-3xl overflow-hidden border border-border shadow-xl relative aspect-[4/5] md:aspect-auto md:h-[600px]">
               <img 
-                src="/images/store_interior.png" 
+                src={getImageUrl("/images/store_interior.png")} 
                 alt="Hakeem Store Interior" 
                 className="w-full h-full object-cover"
                 loading="lazy"

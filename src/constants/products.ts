@@ -29,7 +29,7 @@ export const productsData: Record<string, { name: string, price: string, image: 
     { name: "Nescafe Classic Coffee (50g)", price: "₹160", image: "/assets/products/nescafe.png", tag: "PURE COFFEE" },
   ],
   "Snacks": [
-    { name: "Lays Classic Salted (50g)", price: "₹20", image: "/assets/products/lays.png", tag: "CRISPY" },
+    { name: "Lays Classic Salted (50g)", price: "₹20", image: "/assets/products/lay's.png", tag: "CRISPY" },
     { name: "Kurkure Masala Munch (100g)", price: "₹40", image: "/assets/products/kurkure.png", tag: "SPICY" },
     { name: "Oreo Chocolate Cookies (120g)", price: "₹35", image: "/assets/products/oreo.png", tag: "SWEET TREAT" },
     { name: "Doritos Nacho Cheese (150g)", price: "₹85", image: "/assets/products/doritos.png", tag: "PARTY SNACK" },

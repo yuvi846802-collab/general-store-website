@@ -45,6 +45,7 @@
     "@tailwindcss/vite": "latest",
     "@tanstack/react-query": "latest",
     "@types/node": "^26.0.1",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "latest",
@@ -73,5 +74,11 @@
     "vite": "latest",
     "wouter": "^3.3.5",
     "zod": "latest"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "papaparse": "^5.5.4",
+    "xlsx": "^0.18.5"
   }
 }

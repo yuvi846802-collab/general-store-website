@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { FaInstagram } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/lib/utils";
 
 const instagramPosts = [
   { id: 1, category: "Fresh Groceries", image: "/images/instagram_groceries.png" },
@@ -40,7 +41,7 @@ export default function InstagramSection() {
               transition={{ duration: 0.4, delay: index * 0.1 }}
               className="aspect-square rounded-2xl relative overflow-hidden group cursor-pointer bg-muted"
             >
-              <img src={post.image} alt={post.category} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
+              <img src={getImageUrl(post.image)} alt={post.category} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <FaInstagram className="text-white text-3xl transform scale-50 group-hover:scale-100 transition-transform duration-300" />
               </div>

@@ -119,7 +119,8 @@ export default function AdminCustomers() {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>

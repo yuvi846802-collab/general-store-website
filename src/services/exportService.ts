@@ -1,0 +1,107 @@
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
+export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
+
+export interface ExportConfig {
+  format: ExportFormat;
+  filename: string;
+  columns: string[];
+}
+
+export const exportService = {
+  exportData: (data: any[], config: ExportConfig) => {
+    // Filter data based on selected columns
+    const filteredData = data.map(item => {
+      const filteredItem: any = {};
+      config.columns.forEach(col => {
+        // Map common internal keys to user-friendly column names
+        const keyMap: any = {
+          'Product Name': 'name',
+          'SKU': 'sku',
+          'Category': 'category',
+          'Price': 'price',
+          'Inventory': 'stock',
+          'Status': 'status'
+        };
+        const internalKey = keyMap[col] || col.toLowerCase();
+        filteredItem[col] = item[internalKey] !== undefined ? item[internalKey] : '';
+      });
+      return filteredItem;
+    });
+
+    switch (config.format) {
+      case 'csv':
+        exportService.downloadCSV(filteredData, config.filename);
+        break;
+      case 'xlsx':
+        exportService.downloadExcel(filteredData, config.filename);
+        break;
+      case 'json':
+        exportService.downloadJSON(filteredData, config.filename);
+        break;
+      case 'pdf':
+        exportService.downloadPDF(filteredData, config.filename, config.columns);
+        break;
+    }
+  },
+
+  downloadCSV: (data: any[], filename: string) => {
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    exportService.triggerDownload(blob, `${filename}.csv`);
+  },
+
+  downloadExcel: (data: any[], filename: string) => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+    XLSX.writeFile(workbook, `${filename}.xlsx`);
+  },
+
+  downloadJSON: (data: any[], filename: string) => {
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    exportService.triggerDownload(blob, `${filename}.json`);
+  },
+
+  downloadPDF: (data: any[], filename: string, columns: string[]) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(18);
+    doc.text('Hakeem Store - Exported Data', 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+    
+    // Table
+    const tableData = data.map(row => columns.map(col => String(row[col])));
+    
+    (doc as any).autoTable({
+      startY: 36,
+      head: [columns],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [16, 185, 129] }, // Emerald 500
+      styles: { fontSize: 9 },
+    });
+
+    doc.save(`${filename}.pdf`);
+  },
+
+  triggerDownload: (blob: Blob, filename: string) => {
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+};

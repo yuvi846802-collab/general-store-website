@@ -5,6 +5,7 @@ import { X, Heart, ShoppingCart, ChevronLeft, ChevronRight, LayoutGrid, LayoutLi
 import { CategoryCard } from "../features/products/CategoryCard";
 import { categories } from "../constants/data";
 import { productsData } from "../constants/products";
+import { getImageUrl } from "../lib/utils";
 
 // Use React.memo to prevent unnecessary re-renders
 const MemoizedCategoryCard = React.memo(CategoryCard);
@@ -175,7 +176,7 @@ export default function ProductCategories() {
                           {/* Image */}
                           <div className="h-[210px] w-full overflow-hidden bg-[#0A0D14]">
                             <img 
-                              src={product.image} 
+                              src={getImageUrl(product.image)} 
                               alt={product.name}
                               className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110"
                               loading="lazy"

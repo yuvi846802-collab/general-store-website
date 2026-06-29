@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRealTimeData } from "@/hooks/useRealTimeData";
 import { Plus, Search, Edit, Trash2, Tag, MoreHorizontal } from "lucide-react";
 import { productsData } from "@/constants/products";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +7,7 @@ import { motion } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { createCategory, CategoryFormData } from "@/services/api";
 import { CategoryModal } from "./categories/CategoryModal";
+import { getImageUrl } from "@/lib/utils";
 
 interface Category {
   id: string;
@@ -30,6 +32,23 @@ export default function AdminCategories() {
 
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const updateTrigger = useRealTimeData('category');
+
+  useEffect(() => {
+    const storageKey = 'admin_categorys_db';
+    const dbData = localStorage.getItem(storageKey);
+    if (dbData) {
+      const parsed = JSON.parse(dbData);
+      const mapped = parsed.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        count: 0,
+        status: c.active ? 'active' : 'inactive',
+        image: undefined
+      }));
+      setCategories([...mapped, ...initialCategories]);
+    }
+  }, [updateTrigger]);
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this category?")) {
@@ -108,7 +127,7 @@ export default function AdminCategories() {
             {/* Thumbnail */}
             <div className="h-40 bg-accent/30 relative flex items-center justify-center p-4">
               {cat.image ? (
-                <img src={cat.image} alt={cat.name} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                <img src={getImageUrl(cat.image)} alt={cat.name} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
               ) : (
                 <Tag size={40} className="text-muted-foreground/30" />
               )}

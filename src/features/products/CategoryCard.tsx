@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { Category } from '../../types';
 import { categoryIcons, categoryStyles } from '../../constants/data';
+import { getImageUrl } from '../../lib/utils';
 
 interface CategoryCardProps {
   category: Category;
@@ -39,7 +40,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, index, isS
         className={`relative h-[380px] w-full rounded-[24px] overflow-hidden group cursor-pointer border border-black/5 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.15)] transition-all duration-300 transform hover:scale-[1.03] focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-2 ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}`}
       >
         <img 
-          src={category.image} 
+          src={getImageUrl(category.image)} 
           alt={`${category.name} representation`} 
           loading="lazy"
           decoding="async"

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/lib/utils";
 
 const HeroSection = memo(() => {
   return (
@@ -8,7 +9,7 @@ const HeroSection = memo(() => {
       {/* Background Image & Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/images/hero_background.png" 
+          src={getImageUrl("/images/hero_background.png")} 
           alt="Hakeem Store Interior" 
           className="w-full h-full object-cover"
           fetchPriority="high"

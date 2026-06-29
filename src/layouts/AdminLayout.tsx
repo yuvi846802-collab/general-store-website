@@ -2,6 +2,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
+import GlobalSearch from "@/components/admin/GlobalSearch";
+import QuickCreateModal from "@/components/admin/QuickCreateModal";
 import { LogOut, Menu, User as UserIcon, Search, Bell, Globe, Sun, Moon, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -19,6 +21,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => setMounted(true), []);
@@ -75,25 +78,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Menu size={20} />
               </button>
 
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-muted-foreground w-64 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-                <Search size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Search anywhere... (⌘K)" 
-                  className="bg-transparent border-none focus:outline-none w-full text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
+              <GlobalSearch />
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
               
-              <button 
-                onClick={() => toast({ title: "Quick Create", description: "Opening creation menu..." })}
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsCreateOpen(true)}
                 className="hidden sm:flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow"
               >
                 <Plus size={16} />
                 <span>Create</span>
-              </button>
+              </motion.button>
 
               <div className="w-px h-6 bg-border mx-1 hidden sm:block"></div>
 
@@ -105,14 +103,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Globe size={18} />
               </button>
 
-              {mounted && (
-                <button 
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
-              )}
 
               <button 
                 onClick={() => toast({ title: "Notifications", description: "You have 3 new notifications." })}
@@ -154,11 +144,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
 
           {/* Floating Action Button (Mobile) */}
-          <button className="sm:hidden fixed bottom-6 right-6 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-20">
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsCreateOpen(true)}
+            className="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40"
+          >
             <Plus size={24} />
-          </button>
+          </motion.button>
         </div>
       </div>
+      
+      {/* Modals */}
+      <QuickCreateModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
     </ProtectedRoute>
   );
 }
