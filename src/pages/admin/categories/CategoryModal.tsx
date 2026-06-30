@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, UploadCloud, Image as ImageIcon, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
-import { CategoryFormData } from "@/services/api";
+import { CategoryFormData } from "../Categories";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 
 const categorySchema = z.object({

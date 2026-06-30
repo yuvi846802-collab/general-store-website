@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/Home"));
+const Page = lazy(() => import("@/pages/Page"));
 
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -38,6 +39,14 @@ function Router() {
       <Switch>
         {/* Public Routes */}
         <Route path="/" component={Home} />
+        <Route path="/about" component={Page} />
+        <Route path="/faqs" component={Page} />
+        <Route path="/help" component={Page} />
+        <Route path="/returns" component={Page} />
+        <Route path="/privacy" component={Page} />
+        <Route path="/terms" component={Page} />
+        <Route path="/track-order" component={Page} />
+        <Route path="/contact" component={Page} />
         
         {/* Admin Public Route */}
         <Route path="/admin/login" component={AdminLogin} />

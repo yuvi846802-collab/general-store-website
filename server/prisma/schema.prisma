@@ -142,3 +142,30 @@ model Wishlist {
 
   products  Product[]
 }
+
+model StoreSettings {
+  id              String   @id @default(uuid())
+  storeName       String   @default("Hakeem Store")
+  storeDescription String   @default("Your trusted neighborhood general store in Naryawal, providing quality products and excellent service to our community for years.")
+  phone           String   @default("+91 7896541230")
+  email           String   @default("support@hakeemstore.com")
+  address         String   @default("Naryawal, Bareilly, Uttar Pradesh, India")
+  businessHours   String   @default("Mon - Sun: 8:00 AM - 10:00 PM")
+  googleMapsUrl   String   @default("https://maps.google.com/?q=Naryawal,Bareilly,Uttar+Pradesh")
+  logoUrl         String?
+  
+  ctaHeading      String   @default("Visit Hakeem Store Today")
+  ctaSubtitle     String   @default("Everything you need, all in one place.")
+  ctaPhone        String   @default("+917896541230")
+  ctaMapsUrl      String   @default("https://maps.google.com/?q=Naryawal,Bareilly,Uttar+Pradesh")
+  
+  socialLinks     String   @default("[{\"platform\":\"instagram\",\"url\":\"https://instagram.com/hakeem_store\"},{\"platform\":\"whatsapp\",\"url\":\"https://wa.me/917896541230\"},{\"platform\":\"facebook\",\"url\":\"#\"},{\"platform\":\"twitter\",\"url\":\"#\"}]")
+  paymentMethods  String   @default("[\"visa\",\"mastercard\",\"upi\",\"paytm\",\"phonepe\"]")
+  quickLinks      String   @default("[{\"label\":\"About Us\",\"url\":\"/about\"},{\"label\":\"Products\",\"url\":\"/products\"},{\"label\":\"Why Choose Us\",\"url\":\"/#why-choose-us\"},{\"label\":\"Customer Reviews\",\"url\":\"/#reviews\"},{\"label\":\"Contact Us\",\"url\":\"/contact\"},{\"label\":\"FAQs\",\"url\":\"/faqs\"}]")
+  supportLinks    String   @default("[{\"label\":\"Help Center\",\"url\":\"/help\"},{\"label\":\"Returns & Refunds\",\"url\":\"/returns\"},{\"label\":\"Privacy Policy\",\"url\":\"/privacy\"},{\"label\":\"Terms & Conditions\",\"url\":\"/terms\"},{\"label\":\"Track Your Order\",\"url\":\"/track-order\"}]")
+  
+  copyrightText   String   @default("© 2026 Hakeem Store. All rights reserved.")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

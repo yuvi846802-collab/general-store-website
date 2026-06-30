@@ -32,11 +32,13 @@ app.use(cookieParser());
 import authRoutes from './routes/auth.routes';
 import categoryRoutes from './routes/category.routes';
 import productRoutes from './routes/product.routes';
+import settingsRoutes from './routes/settings';
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

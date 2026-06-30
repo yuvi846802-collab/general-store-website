@@ -15,7 +15,8 @@ export type CategoryFormData = {
   slug: string;
   description?: string;
   status: "active" | "inactive";
-  image?: string;
+  image?: string | File | null;
+  banner?: string | File | null;
 };
 
 export default function AdminCategories() {
@@ -63,7 +64,7 @@ export default function AdminCategories() {
   });
 
   const handleAddCategory = (data: CategoryFormData) => {
-    createCategoryMutation.mutate(data);
+    createCategoryMutation.mutate(data as any);
   };
 
   const filteredCategories = categories.filter(c => 
@@ -117,7 +118,7 @@ export default function AdminCategories() {
                 <Tag size={40} className="text-muted-foreground/30" />
               )}
               <div className="absolute top-3 right-3 bg-background/80 backdrop-blur px-2 py-1 rounded-md text-xs font-bold text-foreground border border-border shadow-sm">
-                {cat.count} Items
+                {(cat as any)._count?.products || 0} Items
               </div>
             </div>
             

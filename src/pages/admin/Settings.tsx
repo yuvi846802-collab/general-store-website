@@ -1,27 +1,74 @@
-import { useState } from "react";
-import { Save, Store, Globe, Palette, Mail, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, Store, Globe, Palette, Mail, Shield, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { settingsService, StoreSettings } from "@/services/settingsService";
+import { toast } from "@/hooks/use-toast";
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("general");
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<Partial<StoreSettings>>({});
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: settingsService.getSettings,
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setFormData(settings);
+    }
+  }, [settings]);
+
+  const mutation = useMutation({
+    mutationFn: (data: Partial<StoreSettings>) => settingsService.updateSettings(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      toast({ title: "Success", description: "Settings saved successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to save settings. Please try again.", variant: "destructive" });
+    }
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSave = () => {
+    mutation.mutate(formData);
+  };
 
   const tabs = [
-    { id: "general", label: "General", icon: Store },
+    { id: "general", label: "General & Footer", icon: Store },
     { id: "seo", label: "SEO & Web", icon: Globe },
     { id: "theme", label: "Theme & Branding", icon: Palette },
     { id: "notifications", label: "Notifications", icon: Mail },
     { id: "security", label: "Security", icon: Shield },
   ];
 
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
   return (
     <div className="pb-24">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Settings</h1>
-          <p className="text-sm text-muted-foreground">Manage your store configuration and preferences.</p>
+          <p className="text-sm text-muted-foreground">Manage your store configuration, footer details and preferences.</p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm shadow-md shadow-primary/20 transition-colors">
-          <Save size={16} /> Save Changes
+        <button 
+          onClick={handleSave}
+          disabled={mutation.isPending}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground font-semibold rounded-xl text-sm shadow-md shadow-primary/20 transition-colors"
+        >
+          {mutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
+          Save Changes
         </button>
       </div>
 
@@ -54,40 +101,81 @@ export default function AdminSettings() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-semibold text-foreground mb-2">Store Name</label>
-                    <input type="text" defaultValue="Hakeem Store" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    <input type="text" name="storeName" value={formData.storeName || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Store Description (Footer)</label>
+                    <textarea name="storeDescription" value={formData.storeDescription || ""} onChange={handleChange} rows={3} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">Store Contact Email</label>
-                      <input type="email" defaultValue="contact@hakeemstore.com" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                      <label className="block text-sm font-semibold text-foreground mb-2">Contact Email</label>
+                      <input type="email" name="email" value={formData.email || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-foreground mb-2">Store Phone</label>
-                      <input type="text" defaultValue="+91 7896541230" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                      <input type="text" name="phone" value={formData.phone || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Business Hours</label>
+                      <input type="text" name="businessHours" value={formData.businessHours || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Copyright Text</label>
+                      <input type="text" name="copyrightText" value={formData.copyrightText || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-foreground mb-2">Physical Address</label>
-                    <textarea rows={3} defaultValue="Naryawal, Bareilly, Uttar Pradesh, India" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                    <textarea name="address" value={formData.address || ""} onChange={handleChange} rows={2} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Google Maps URL</label>
+                    <input type="url" name="googleMapsUrl" value={formData.googleMapsUrl || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                   </div>
                 </div>
               </div>
 
               <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
-                <h2 className="text-lg font-bold text-foreground mb-6">Standards & Formats</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h2 className="text-lg font-bold text-foreground mb-6">Footer CTA Banner</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Currency</label>
-                    <select className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                      <option>Indian Rupee (INR ₹)</option>
-                      <option>US Dollar (USD $)</option>
-                    </select>
+                    <label className="block text-sm font-semibold text-foreground mb-2">CTA Heading</label>
+                    <input type="text" name="ctaHeading" value={formData.ctaHeading || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Timezone</label>
-                    <select className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                      <option>(GMT+05:30) Asia/Kolkata</option>
-                    </select>
+                    <label className="block text-sm font-semibold text-foreground mb-2">CTA Subtitle</label>
+                    <input type="text" name="ctaSubtitle" value={formData.ctaSubtitle || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">CTA Phone</label>
+                    <input type="text" name="ctaPhone" value={formData.ctaPhone || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">CTA Maps URL</label>
+                    <input type="url" name="ctaMapsUrl" value={formData.ctaMapsUrl || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-foreground mb-6">Advanced Configurations (JSON)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Social Links</label>
+                    <textarea name="socialLinks" value={formData.socialLinks || ""} onChange={handleChange} rows={4} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground font-mono text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Payment Methods</label>
+                    <textarea name="paymentMethods" value={formData.paymentMethods || ""} onChange={handleChange} rows={4} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground font-mono text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Quick Links</label>
+                    <textarea name="quickLinks" value={formData.quickLinks || ""} onChange={handleChange} rows={4} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground font-mono text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Support Links</label>
+                    <textarea name="supportLinks" value={formData.supportLinks || ""} onChange={handleChange} rows={4} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground font-mono text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
                   </div>
                 </div>
               </div>
