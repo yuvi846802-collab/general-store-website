@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'wouter';
 import { entitySchemas } from '@/constants/schemas';
 import DynamicCreateForm from '@/components/admin/DynamicCreateForm';
 import { backendService } from '@/services/backendService';
+import { createProduct, createCategory } from '@/services/api';
 import { ChevronRight, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -34,12 +35,19 @@ export default function CreateEntity() {
   };
 
   const handleSubmit = async (data: any) => {
-    // Phase 6 & Phase 9: Real API integration simulation with error handling
-    await backendService.createEntity(entityType, data);
+    // Route to real backend APIs if available
+    if (entityType === 'product') {
+      await createProduct(data);
+    } else if (entityType === 'category') {
+      await createCategory(data);
+    } else {
+      // Fallback for other entities that are still mocked
+      await backendService.createEntity(entityType, data);
+    }
     
-    // Phase 8: After successful creation, navigate back
+    // After successful creation, navigate back
     setTimeout(() => {
-      setLocation(`/admin`); // In a real app we might go to `/admin/${entityType}s`
+      setLocation(`/admin/${entityType === 'category' ? 'categories' : entityType + 's'}`); 
     }, 1500); // Give user time to read the success toast
   };
 

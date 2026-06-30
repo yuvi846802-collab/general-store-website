@@ -5,6 +5,7 @@ import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, UploadCloud, Image as ImageIcon, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import { CategoryFormData } from "@/services/api";
+import { PremiumImage } from "@/components/ui/PremiumImage";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name is required (min 2 chars)"),
@@ -204,7 +205,7 @@ export function CategoryModal({ isOpen, onClose, onSubmit, isSubmitting, error }
                     <input type="file" ref={imageInputRef} onChange={(e) => handleImageChange(e, setImagePreview)} accept="image/png, image/jpeg, image/webp" className="hidden" />
                     {imagePreview ? (
                       <div className="relative inline-block">
-                        <img src={imagePreview} alt="Preview" className="h-32 object-contain rounded-lg" />
+                        <PremiumImage src={imagePreview} fallbackText="Preview" className="h-32 object-contain rounded-lg" containerClassName="h-32" />
                         <button type="button" onClick={() => setImagePreview(null)} className="absolute -top-3 -right-3 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow-sm"><X size={14}/></button>
                       </div>
                     ) : (

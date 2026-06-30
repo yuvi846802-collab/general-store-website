@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -84,6 +85,8 @@ export default function Navbar() {
             <Search size={18} />
           </button>
 
+          <ThemeToggle />
+
           <button 
             onClick={() => setLocation("/admin/login")}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -126,6 +129,8 @@ export default function Navbar() {
               2
             </span>
           </button>
+
+          <ThemeToggle />
 
           <button 
             className="p-2 rounded-md hover:bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-green-500"

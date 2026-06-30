@@ -80,7 +80,7 @@ const itemVariants = {
 
 export default function WhyChooseUs() {
   return (
-    <section id="why-us" className="py-24 relative overflow-hidden bg-[#0A0D14] text-white">
+    <section id="why-us" className="py-24 relative overflow-hidden bg-background text-foreground transition-colors">
       {/* Background Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-emerald-900/20 blur-[120px]"></div>
@@ -93,10 +93,10 @@ export default function WhyChooseUs() {
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 mb-6 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-card/50 mb-6 backdrop-blur-md"
           >
             <Star size={14} className="text-yellow-500 fill-yellow-500" />
-            <span className="text-white/80 text-sm font-medium">Trusted by 10,000+ Happy Customers</span>
+            <span className="text-muted-foreground text-sm font-medium">Trusted by 10,000+ Happy Customers</span>
           </motion.div>
           
           <motion.h2 
@@ -104,7 +104,7 @@ export default function WhyChooseUs() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight font-heading tracking-tight"
+            className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight font-heading tracking-tight"
           >
             Why Thousands <br className="hidden md:block" />
             Trust <span className="text-emerald-400">Hakeem Store</span>
@@ -115,7 +115,7 @@ export default function WhyChooseUs() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
+            className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
           >
             We are more than just a store; we are a part of your daily life.<br className="hidden md:block" />
             Offering quality products, best prices and a service you can rely on.
@@ -141,7 +141,7 @@ export default function WhyChooseUs() {
         >
           {features.map((feature, index) => (
             <motion.div key={index} variants={itemVariants} className="h-full">
-              <div className="relative bg-white/[0.02] border border-white/5 rounded-2xl p-8 h-full flex flex-col group hover:bg-white/[0.04] transition-colors duration-300 overflow-hidden shadow-2xl backdrop-blur-sm">
+              <div className="relative glass-card rounded-2xl p-8 h-full flex flex-col group hover:bg-accent/50 transition-colors duration-300 overflow-hidden shadow-2xl backdrop-blur-sm">
                 
                 {/* Colored bottom glow line */}
                 <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r opacity-50 transition-opacity group-hover:opacity-100 ${feature.lineGradient}`}></div>
@@ -151,14 +151,14 @@ export default function WhyChooseUs() {
                   <div className={`w-14 h-14 rounded-2xl border ${feature.borderColor} ${feature.bgLight} ${feature.color} flex items-center justify-center shadow-lg backdrop-blur-md group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon size={26} strokeWidth={1.5} />
                   </div>
-                  <div className="text-5xl font-black text-white/[0.03] select-none font-heading tracking-tighter group-hover:text-white/[0.06] transition-colors duration-300 mt-[-5px]">
+                  <div className="text-5xl font-black text-muted-foreground/10 select-none font-heading tracking-tighter group-hover:text-muted-foreground/20 transition-colors duration-300 mt-[-5px]">
                     {feature.id}
                   </div>
                 </div>
                 
                 {/* Content */}
-                <h3 className="text-xl font-bold text-white mb-3 font-heading tracking-tight">{feature.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed mb-8 flex-grow">
+                <h3 className="text-xl font-bold text-foreground mb-3 font-heading tracking-tight">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-8 flex-grow">
                   {feature.desc}
                 </p>
                 
@@ -178,7 +178,7 @@ export default function WhyChooseUs() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-8 bg-white/[0.02] border border-white/5 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md shadow-2xl relative overflow-hidden"
+          className="mt-8 glass-card border-border/50 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden"
         >
           {/* Subtle glow behind CTA */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/10 to-transparent pointer-events-none"></div>
@@ -188,14 +188,14 @@ export default function WhyChooseUs() {
               <Headphones size={24} />
             </div>
             <div>
-              <h4 className="text-white font-bold text-lg mb-1 tracking-tight">Need Help? We're Here For You!</h4>
-              <p className="text-gray-400 text-sm">Call us now or visit our store. We'd love to assist you.</p>
+              <h4 className="text-foreground font-bold text-lg mb-1 tracking-tight">Need Help? We're Here For You!</h4>
+              <p className="text-muted-foreground text-sm">Call us now or visit our store. We'd love to assist you.</p>
             </div>
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto relative z-10">
             <a href="#contact" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto bg-transparent border-white/10 text-white hover:bg-white/5 hover:text-white rounded-full px-6 py-5 gap-2 transition-all font-medium">
+              <Button variant="outline" className="w-full sm:w-auto bg-transparent border-border text-foreground hover:bg-accent rounded-full px-6 py-5 gap-2 transition-all font-medium">
                 <Store size={18} />
                 Visit Our Store
               </Button>

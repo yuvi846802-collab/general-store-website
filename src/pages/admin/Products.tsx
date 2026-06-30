@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRealTimeData } from "@/hooks/useRealTimeData";
 import { productService, Product } from "@/services/productService";
 import { Plus, Search, Filter, Edit, Trash2, Download, Upload, MoreHorizontal, CheckCircle2, XCircle, AlertCircle, Eye, Copy, Power } from "lucide-react";
+import { PremiumImage } from "@/components/ui/PremiumImage";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { getImageUrl } from "@/lib/utils";
@@ -231,7 +232,7 @@ export default function AdminProducts() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-background border border-border p-1 flex items-center justify-center shrink-0 shadow-sm">
-                          <img src={getImageUrl(product.image)} alt={product.name} className="max-w-full max-h-full object-contain" />
+                          <PremiumImage src={getImageUrl(product.image)} fallbackText={product.name} className="max-w-full max-h-full object-contain" containerClassName="w-full h-full" />
                         </div>
                         <div>
                           <div className="font-semibold text-foreground text-sm hover:text-primary cursor-pointer transition-colors" onClick={() => setLocation(`/admin/products/${product.id}`)}>
@@ -247,7 +248,7 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-semibold text-foreground">{product.price}</span>
-                      {product.oldPrice && <span className="text-xs text-muted-foreground line-through ml-2">{product.oldPrice}</span>}
+                      {product.originalPrice && <span className="text-xs text-muted-foreground line-through ml-2">{product.originalPrice}</span>}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

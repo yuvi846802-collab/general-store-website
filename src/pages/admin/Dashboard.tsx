@@ -97,9 +97,9 @@ export default function AdminDashboard() {
     <div className="space-y-6 pb-20">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card border border-border rounded-2xl p-6 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass-card rounded-2xl p-6">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Dashboard Overview</h1>
+          <h1 className="text-3xl font-heading font-bold text-foreground mb-1 tracking-tight">Dashboard Overview</h1>
           <p className="text-sm text-muted-foreground">Here is what's happening with your store ({timeRange}).</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Main Revenue Chart */}
-            <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="lg:col-span-2 glass-card rounded-2xl p-6">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-foreground">Revenue Analytics</h3>
@@ -377,24 +377,31 @@ const StatCard = ({ title, value, change, isPositive, icon: Icon, delay }: any) 
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, duration: 0.3 }}
-      className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group"
+      transition={{ delay, duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
+      whileHover={{ y: -4, scale: 1.01 }}
+      className="glass-card rounded-2xl p-5 relative overflow-hidden group"
     >
-      <div className="flex justify-between items-start mb-4">
-        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:scale-110 group-hover:bg-primary/20 transition-all">
+      {/* Subtle top gradient line for premium feel */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-primary/50 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-all border border-primary/10 shadow-inner">
           <Icon className="text-primary w-5 h-5" />
         </div>
-        <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full ${
-          isPositive ? "text-emerald-500 bg-emerald-500/10" : "text-destructive bg-destructive/10"
+        <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full border shadow-sm ${
+          isPositive ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-destructive bg-destructive/10 border-destructive/20"
         }`}>
           {isPositive ? <ArrowUpRight size={12} strokeWidth={3} /> : <ArrowDownRight size={12} strokeWidth={3} />}
           {change}
         </span>
       </div>
-      <div>
-        <h3 className="text-2xl font-bold text-foreground tracking-tight">{value}</h3>
-        <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mt-1">{title}</p>
+      <div className="relative z-10">
+        <h3 className="text-3xl font-bold text-foreground tracking-tight mb-1">{value}</h3>
+        <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">{title}</p>
       </div>
+      
+      {/* Decorative background glow */}
+      <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500"></div>
     </motion.div>
   );
 };

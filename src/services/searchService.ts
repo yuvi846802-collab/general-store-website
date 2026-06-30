@@ -1,4 +1,5 @@
 import { productsData } from '@/constants/products';
+import { categories } from '@/constants/data';
 import { fetchDashboardData } from '@/services/api';
 import { productService } from '@/services/productService';
 
@@ -9,6 +10,13 @@ export interface SearchResult {
   description: string;
   url: string;
   iconName: string; // We'll map this to a Lucide icon in the component
+  imageUrl?: string; // Optional image URL for products/categories
+  price?: string;
+  stock?: number;
+  status?: string;
+  date?: string;
+  owner?: string;
+  actionButtons?: string[];
 }
 
 // Statically defined modules/pages for global search
@@ -94,7 +102,14 @@ export const searchService = {
               module: 'Products',
               description: `SKU: PRD-${p.id.padStart(4, '0')} • ${p.category} • ₹${p.price}`,
               url: `/admin/products?search=${p.id}`,
-              iconName: 'Package'
+              iconName: 'Package',
+              imageUrl: p.image,
+              price: `₹${p.price}`,
+              stock: p.stock,
+              status: p.status,
+              date: new Date().toLocaleDateString(),
+              owner: 'Admin',
+              actionButtons: ['Edit', 'Delete']
             });
           }
         });
@@ -125,7 +140,12 @@ export const searchService = {
                 module: 'Orders',
                 description: `Customer: ${order.customer} • Status: ${order.status}`,
                 url: `/admin/orders?search=${order.id}`,
-                iconName: 'ShoppingCart'
+                iconName: 'ShoppingCart',
+                status: order.status,
+                date: order.time,
+                price: `₹${order.amount}`,
+                owner: order.customer,
+                actionButtons: ['View', 'Refund']
               });
             }
 
@@ -140,7 +160,9 @@ export const searchService = {
                   module: 'Customers',
                   description: `Customer Profile`,
                   url: `/admin/customers?search=${encodeURIComponent(order.customer)}`,
-                  iconName: 'User'
+                  iconName: 'User',
+                  owner: order.customer,
+                  actionButtons: ['View Profile', 'Email']
                 });
               }
             }
@@ -148,17 +170,19 @@ export const searchService = {
         });
       }
 
-      // Categories from Dashboard Sales
+      // All Categories
       if (matchesFilter('Categories')) {
-        dashboard.salesByCategory.forEach(cat => {
-          if (searchService.fuzzyMatch(q, cat.name)) {
+        categories.forEach(cat => {
+          if (searchService.fuzzyMatch(q, cat.name) || searchService.fuzzyMatch(q, cat.description)) {
             results.push({
-              id: `cat-db-${cat.name}`,
+              id: `cat-${cat.id}`,
               title: cat.name,
               module: 'Categories',
-              description: `Category Analytics`,
+              description: cat.description,
               url: `/admin/categories?search=${encodeURIComponent(cat.name)}`,
-              iconName: 'Tag'
+              iconName: 'Tag',
+              imageUrl: cat.image,
+              actionButtons: ['Edit Category']
             });
           }
         });
@@ -186,7 +210,9 @@ export const searchService = {
             module: meta.module,
             description: act.desc,
             url: meta.url,
-            iconName: meta.icon
+            iconName: meta.icon,
+            date: act.time,
+            actionButtons: ['View Details']
           });
         }
       });

@@ -29,6 +29,15 @@ app.use('/api', limiter);
 app.use(express.json());
 app.use(cookieParser());
 
+import authRoutes from './routes/auth.routes';
+import categoryRoutes from './routes/category.routes';
+import productRoutes from './routes/product.routes';
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+
 // Health Check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Hakeem Store API is running' });

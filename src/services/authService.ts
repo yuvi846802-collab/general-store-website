@@ -8,28 +8,29 @@ export interface User {
 
 export const authService = {
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
 
-    // Hardcoded credentials for MVP demo purposes
-    if (email === 'admin@hakeemstore.com' && password === 'admin123') {
-      const user: User = {
-        id: '1',
-        name: 'Admin User',
-        email: 'admin@hakeemstore.com',
-        role: 'admin',
-        avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff',
-      };
-      const token = 'mock-jwt-token-12345';
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Invalid email or password');
+      }
+
+      const { user, token } = data;
       
-      // Persist to local storage for demo
+      // Persist to local storage
       localStorage.setItem('admin_token', token);
       localStorage.setItem('admin_user', JSON.stringify(user));
       
       return { user, token };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to connect to server');
     }
-    
-    throw new Error('Invalid email or password');
   },
 
   logout: () => {

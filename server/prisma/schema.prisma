@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -12,7 +13,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(USER)
+  role      String   @default("USER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -22,10 +23,7 @@ model User {
   wishlist  Wishlist?
 }
 
-enum Role {
-  USER
-  ADMIN
-}
+
 
 model Category {
   id          String    @id @default(uuid())
@@ -92,7 +90,7 @@ model CartItem {
 model Order {
   id          String      @id @default(uuid())
   totalAmount Float
-  status      OrderStatus @default(PENDING)
+  status      String      @default("PENDING")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -102,13 +100,7 @@ model Order {
   items       OrderItem[]
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
+
 
 model OrderItem {
   id        String   @id @default(uuid())

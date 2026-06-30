@@ -69,14 +69,14 @@ export default function AdminReviews() {
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors shadow-sm ${
                 isFilterOpen || statusFilter !== "All" || ratingFilter !== "All"
-                  ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500' 
+                  ? 'bg-amber-500 hover:bg-amber-600 text-foreground border-amber-500' 
                   : 'bg-background border-border text-foreground hover:bg-accent'
               }`}
             >
               <Filter size={16} />
               <span className="text-sm font-medium">Filters</span>
               {(statusFilter !== "All" || ratingFilter !== "All") && (
-                <span className="ml-1 w-5 h-5 flex items-center justify-center bg-white/20 rounded-full text-xs font-bold">
+                <span className="ml-1 w-5 h-5 flex items-center justify-center bg-accent/50 rounded-full text-xs font-bold">
                   {(statusFilter !== "All" ? 1 : 0) + (ratingFilter !== "All" ? 1 : 0)}
                 </span>
               )}
@@ -141,7 +141,7 @@ export default function AdminReviews() {
                               onClick={() => setRatingFilter(rating)}
                               className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors border ${
                                 ratingFilter === rating 
-                                  ? 'bg-amber-500 text-white border-amber-500' 
+                                  ? 'bg-amber-500 text-foreground border-amber-500' 
                                   : 'bg-background text-muted-foreground border-border hover:bg-accent'
                               }`}
                             >

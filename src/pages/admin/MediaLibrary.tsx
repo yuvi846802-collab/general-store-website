@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, UploadCloud, Folder, Image as ImageIcon, FileVideo, MoreVertical, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { PremiumImage } from "@/components/ui/PremiumImage";
 
 export default function AdminMediaLibrary() {
   const { toast } = useToast();
@@ -80,7 +81,7 @@ export default function AdminMediaLibrary() {
             key={media.id} 
             className="aspect-square bg-card border border-border rounded-2xl overflow-hidden relative group shadow-sm hover:shadow-md transition-shadow"
           >
-            <img src={media.url} alt={media.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <PremiumImage src={media.url} fallbackText={media.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" containerClassName="w-full h-full" />
             
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
               <div className="flex justify-end">

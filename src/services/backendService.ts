@@ -16,7 +16,7 @@ class BackendService {
 
   // Simulate authentication/authorization
   private async checkAuth() {
-    const authData = localStorage.getItem('hakeem_admin_auth');
+    const authData = localStorage.getItem('admin_token');
     if (!authData) {
       throw new Error("Unauthorized. Please log in again.");
     }

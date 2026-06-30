@@ -1,5 +1,14 @@
 import { ShoppingCart, Users, AlertCircle, MessageSquare, Star, Package, CheckCircle, RefreshCcw } from "lucide-react";
 
+// Helper to get auth headers
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem('admin_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export type DashboardResponse = {
   summary: {
     revenue: { value: string; change: string; isPositive: boolean };
@@ -241,22 +250,66 @@ export type CategoryFormData = {
 };
 
 export const createCategory = async (data: CategoryFormData): Promise<{ id: string } & CategoryFormData> => {
-  // Simulate network latency (800ms - 1500ms)
-  await delay(800 + Math.random() * 700);
+  try {
+    const response = await fetch('http://localhost:5000/api/categories', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
 
-  // Simulate server-side validation error randomly (1 in 20 chance)
-  if (Math.random() < 0.05) {
-    throw new Error("Server Validation Error: A category with this slug already exists.");
+    const result = await response.json();
+
+    if (response.status === 401) {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      window.location.href = '/admin/login';
+      throw new Error("Unauthorized. Please log in again.");
+    }
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create category');
+    }
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to connect to server');
   }
+};
 
-  // Simulate unauthorized error (1 in 30 chance)
-  if (Math.random() < 0.03) {
-    throw new Error("401 Unauthorized: Your session has expired.");
+export type ProductFormData = {
+  name: string;
+  description?: string;
+  price: number | string;
+  originalPrice?: number | string;
+  category: string;
+  stock?: number | string;
+  isPopular?: boolean;
+  image?: string;
+};
+
+export const createProduct = async (data: ProductFormData): Promise<any> => {
+  try {
+    const response = await fetch('http://localhost:5000/api/products', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.status === 401) {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      window.location.href = '/admin/login';
+      throw new Error("Unauthorized. Please log in again.");
+    }
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create product');
+    }
+
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to connect to server');
   }
-
-  // Return success response with generated ID
-  return {
-    id: `cat-${Date.now()}`,
-    ...data
-  };
 };

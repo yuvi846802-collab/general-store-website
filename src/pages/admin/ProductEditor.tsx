@@ -2,10 +2,49 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Save, UploadCloud, Trash2, X, Plus, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import { createProduct, ProductFormData } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProductEditor() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("general");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: "",
+    description: "",
+    category: "Grocery Items",
+    price: "",
+    originalPrice: "",
+    stock: "",
+    isPopular: false,
+    image: ""
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.price) {
+      toast({ title: "Validation Error", description: "Name and Price are required.", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createProduct(formData);
+      toast({ title: "Success", description: "Product created successfully!" });
+      setLocation("/admin/products");
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to save product", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const sections = [
     { id: "general", label: "General Information" },
@@ -34,11 +73,19 @@ export default function AdminProductEditor() {
           </div>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none px-5 py-2.5 bg-card hover:bg-accent border border-border text-foreground font-semibold rounded-xl text-sm transition-colors">
+          <button onClick={() => setLocation("/admin/products")} className="flex-1 sm:flex-none px-5 py-2.5 bg-card hover:bg-accent border border-border text-foreground font-semibold rounded-xl text-sm transition-colors">
             Discard
           </button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm shadow-md shadow-primary/20 transition-colors">
-            <Save size={16} /> Save Product
+          <button 
+            onClick={handleSave}
+            disabled={isSubmitting}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm shadow-md shadow-primary/20 transition-colors disabled:opacity-70"
+          >
+            {isSubmitting ? (
+              <><div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div> Saving...</>
+            ) : (
+              <><Save size={16} /> Save Product</>
+            )}
           </button>
         </div>
       </div>
@@ -54,7 +101,7 @@ export default function AdminProductEditor() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Product Name</label>
-                <input type="text" placeholder="e.g. Premium Basmati Rice" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Premium Basmati Rice" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Description</label>
@@ -65,16 +112,18 @@ export default function AdminProductEditor() {
                       <button key={format} className="w-8 h-8 rounded hover:bg-accent flex items-center justify-center text-sm font-bold text-muted-foreground hover:text-foreground">{format}</button>
                     ))}
                   </div>
-                  <textarea rows={5} placeholder="Describe your product..." className="w-full bg-transparent p-4 text-sm text-foreground focus:outline-none resize-y min-h-[120px]"></textarea>
+                  <textarea name="description" value={formData.description} onChange={handleChange} rows={5} placeholder="Describe your product..." className="w-full bg-transparent p-4 text-sm text-foreground focus:outline-none resize-y min-h-[120px]"></textarea>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
-                  <select className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                    <option>Grocery Items</option>
-                    <option>Beverages</option>
-                    <option>Snacks</option>
+                  <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    <option value="Grocery Items">Grocery Items</option>
+                    <option value="Beverages">Beverages</option>
+                    <option value="Snacks">Snacks</option>
+                    <option value="Household Essentials">Household Essentials</option>
+                    <option value="Personal Care">Personal Care</option>
                   </select>
                 </div>
                 <div>
@@ -93,14 +142,14 @@ export default function AdminProductEditor() {
                 <label className="block text-sm font-semibold text-foreground mb-2">Regular Price</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
-                  <input type="number" placeholder="0.00" className="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <input type="number" name="price" value={formData.price} onChange={handleChange} placeholder="0.00" className="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">Compare at Price <Info size={14} className="text-muted-foreground"/></label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
-                  <input type="number" placeholder="0.00" className="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <input type="number" name="originalPrice" value={formData.originalPrice} onChange={handleChange} placeholder="0.00" className="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
               </div>
             </div>
@@ -116,7 +165,7 @@ export default function AdminProductEditor() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Stock Quantity</label>
-                <input type="number" placeholder="0" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary" />
+                <input type="number" name="stock" value={formData.stock} onChange={handleChange} placeholder="0" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary" />
               </div>
             </div>
           </motion.section>

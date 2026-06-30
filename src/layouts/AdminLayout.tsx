@@ -4,7 +4,8 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import GlobalSearch from "@/components/admin/GlobalSearch";
 import QuickCreateModal from "@/components/admin/QuickCreateModal";
-import { LogOut, Menu, User as UserIcon, Search, Bell, Globe, Sun, Moon, Plus } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogOut, Menu, User as UserIcon, Search, Bell, Globe, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +17,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, logout } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -103,6 +104,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Globe size={18} />
               </button>
 
+              <ThemeToggle />
 
               <button 
                 onClick={() => toast({ title: "Notifications", description: "You have 3 new notifications." })}
@@ -139,7 +141,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Page Content Scroll Area */}
           <main id="main-scroll-area" className="flex-1 overflow-auto p-4 sm:p-8 relative">
             <div className="max-w-[1600px] mx-auto w-full">
-              {children}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location}
+                  initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </main>
 

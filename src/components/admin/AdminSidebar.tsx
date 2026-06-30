@@ -80,7 +80,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="h-full bg-card border-r border-border flex flex-col transition-all duration-300 relative group z-30">
+    <aside className="h-full glass-panel flex flex-col transition-all duration-300 relative group z-30">
       
       <div className="h-16 flex items-center justify-between border-b border-border shrink-0 px-4">
         <div className="flex items-center gap-3 cursor-pointer overflow-hidden group/logo" onClick={() => setLocation("/")} title="Go to Website">

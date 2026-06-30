@@ -1,74 +1,59 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, Tag } from "lucide-react";
 import { useRealTimeData } from "@/hooks/useRealTimeData";
-import { Plus, Search, Edit, Trash2, Tag, MoreHorizontal } from "lucide-react";
-import { productsData } from "@/constants/products";
+import { PremiumImage } from '@/components/ui/PremiumImage';
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
-import { createCategory, CategoryFormData } from "@/services/api";
 import { CategoryModal } from "./categories/CategoryModal";
+import { categoryService, Category } from "@/services/categoryService";
 import { getImageUrl } from "@/lib/utils";
 
-interface Category {
-  id: string;
+// Make sure to match the API CategoryFormData if needed, or simply use any for the add handler for now.
+export type CategoryFormData = {
   name: string;
-  count: number;
-  status: string;
+  slug: string;
+  description?: string;
+  status: "active" | "inactive";
   image?: string;
-}
+};
 
 export default function AdminCategories() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-
-  const initialCategories: Category[] = Object.keys(productsData).map((cat, idx) => ({
-    id: `cat-${idx}`,
-    name: cat,
-    count: productsData[cat].length,
-    status: 'active',
-    // Get the first product's image as category thumbnail for demo
-    image: productsData[cat][0]?.image
-  }));
-
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const updateTrigger = useRealTimeData('category');
 
-  useEffect(() => {
-    const storageKey = 'admin_categorys_db';
-    const dbData = localStorage.getItem(storageKey);
-    if (dbData) {
-      const parsed = JSON.parse(dbData);
-      const mapped = parsed.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        count: 0,
-        status: c.active ? 'active' : 'inactive',
-        image: undefined
-      }));
-      setCategories([...mapped, ...initialCategories]);
+  const fetchCategories = async () => {
+    try {
+      const data = await categoryService.getCategories();
+      setCategories(data);
+    } catch (e) {
+      console.error(e);
     }
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, [updateTrigger]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      setCategories(categories.filter(c => c.id !== id));
-      toast({ title: "Category deleted" });
+      try {
+        await categoryService.deleteCategory(id);
+        toast({ title: "Category deleted" });
+        fetchCategories();
+      } catch (e) {
+        toast({ variant: "destructive", title: "Failed to delete" });
+      }
     }
   };
 
   const createCategoryMutation = useMutation({
-    mutationFn: createCategory,
+    mutationFn: categoryService.createCategory,
     onSuccess: (data) => {
-      // Optimistic Update
-      const newCat: Category = {
-        id: data.id,
-        name: data.name,
-        count: 0,
-        status: data.status,
-        image: typeof data.image === 'string' ? data.image : undefined
-      };
-      setCategories([newCat, ...categories]);
+      fetchCategories();
       toast({ 
         title: "✅ Category Created Successfully", 
         description: `${data.name} has been added to your catalog.` 
@@ -127,7 +112,7 @@ export default function AdminCategories() {
             {/* Thumbnail */}
             <div className="h-40 bg-accent/30 relative flex items-center justify-center p-4">
               {cat.image ? (
-                <img src={getImageUrl(cat.image)} alt={cat.name} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                <PremiumImage src={getImageUrl(cat.image)} fallbackText={cat.name} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" containerClassName="w-full h-full" />
               ) : (
                 <Tag size={40} className="text-muted-foreground/30" />
               )}
