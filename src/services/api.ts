@@ -1,12 +1,32 @@
 import { ShoppingCart, Users, AlertCircle, MessageSquare, Star, Package, CheckCircle, RefreshCcw } from "lucide-react";
 
-// Helper to get auth headers
 export const getAuthHeaders = () => {
-  const token = localStorage.getItem('admin_token');
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+};
+
+export const API_URL = 'http://localhost:5000/api';
+
+// Helper for fetch with credentials
+export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      ...getAuthHeaders(),
+      ...options.headers,
+    },
+  });
+
+  if (response.status === 401) {
+    if (window.location.pathname !== '/admin/login') {
+      window.location.href = '/admin/login';
+    }
+    throw new Error("Unauthorized. Please log in again.");
+  }
+
+  return response;
 };
 
 export type DashboardResponse = {
@@ -251,20 +271,12 @@ export type CategoryFormData = {
 
 export const createCategory = async (data: CategoryFormData): Promise<{ id: string } & CategoryFormData> => {
   try {
-    const response = await fetch('http://localhost:5000/api/categories', {
+    const response = await fetchWithAuth(`${API_URL}/categories`, {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify(data)
     });
 
     const result = await response.json();
-
-    if (response.status === 401) {
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
-      window.location.href = '/admin/login';
-      throw new Error("Unauthorized. Please log in again.");
-    }
 
     if (!response.ok) {
       throw new Error(result.error || 'Failed to create category');
@@ -289,20 +301,12 @@ export type ProductFormData = {
 
 export const createProduct = async (data: ProductFormData): Promise<any> => {
   try {
-    const response = await fetch('http://localhost:5000/api/products', {
+    const response = await fetchWithAuth(`${API_URL}/products`, {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify(data)
     });
 
     const result = await response.json();
-
-    if (response.status === 401) {
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
-      window.location.href = '/admin/login';
-      throw new Error("Unauthorized. Please log in again.");
-    }
 
     if (!response.ok) {
       throw new Error(result.error || 'Failed to create product');
@@ -311,5 +315,33 @@ export const createProduct = async (data: ProductFormData): Promise<any> => {
     return result;
   } catch (error: any) {
     throw new Error(error.message || 'Failed to connect to server');
+  }
+};
+
+export const fetchPublicProducts = async (): Promise<any[]> => {
+  try {
+    const response = await fetch(`${API_URL}/products`);
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to fetch products');
+    }
+    return result;
+  } catch (error: any) {
+    console.error('Fetch public products error:', error);
+    return [];
+  }
+};
+
+export const fetchPublicCategories = async (): Promise<any[]> => {
+  try {
+    const response = await fetch(`${API_URL}/categories`);
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to fetch categories');
+    }
+    return result;
+  } catch (error: any) {
+    console.error('Fetch public categories error:', error);
+    return [];
   }
 };

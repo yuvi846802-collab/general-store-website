@@ -5,7 +5,7 @@ import { authenticate } from '../middleware/auth.middleware';
 const router = Router();
 
 router.post('/', authenticate, createCategory);
-router.get('/', authenticate, getCategories); // Optionally secure GET as well for admin
+router.get('/', getCategories); // Public GET for storefront
 router.put('/:id', authenticate, updateCategory);
 router.delete('/:id', authenticate, deleteCategory);
 

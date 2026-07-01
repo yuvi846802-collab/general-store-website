@@ -1,5 +1,4 @@
-import { getAuthHeaders } from './api';
-
+import { fetchWithAuth, API_URL, getAuthHeaders } from './api';
 export interface Product {
   id: string;
   name: string;
@@ -12,74 +11,67 @@ export interface Product {
   status: 'active' | 'draft' | 'hidden';
 }
 
-const API_URL = 'http://localhost:5000/api';
+
 
 export const productService = {
   getProducts: async (): Promise<Product[]> => {
-    const res = await fetch(`${API_URL}/products`, {
+    const res = await fetchWithAuth(`${API_URL}/products`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error('Failed to fetch products');
     const data = await res.json();
     return data.map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      category: p.category?.name || 'Uncategorized',
+      ...p,
       price: p.price.toString(),
       originalPrice: p.originalPrice ? p.originalPrice.toString() : undefined,
-      image: p.image,
-      stock: p.stock,
-      status: 'active'
+      category: typeof p.category === 'object' ? p.category.name : p.category,
+      status: p.status || 'active'
     }));
   },
 
   getProduct: async (id: string): Promise<Product | null> => {
+    // Optionally we could fetch single product, but for now we'll fetch all and filter
+    // as that matches previous behavior. Better approach would be GET /products/:id
     const products = await productService.getProducts();
     return products.find(p => p.id === id) || null;
   },
 
   createProduct: async (product: Omit<Product, 'id'>): Promise<Product> => {
-    const res = await fetch(`${API_URL}/products`, {
+    const res = await fetchWithAuth(`${API_URL}/products`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(product)
     });
     if (!res.ok) throw new Error('Failed to create product');
-    const p = await res.json();
+    const data = await res.json();
     return {
-      id: p.id,
-      name: p.name,
-      category: product.category,
-      price: p.price.toString(),
-      originalPrice: p.originalPrice ? p.originalPrice.toString() : undefined,
-      image: p.image,
-      stock: p.stock,
-      status: 'active'
+      ...data,
+      category: typeof data.category === 'object' ? data.category.name : data.category,
+      price: data.price.toString(),
+      originalPrice: data.originalPrice ? data.originalPrice.toString() : undefined,
+      status: data.status || 'active'
     };
   },
 
   updateProduct: async (id: string, updates: Partial<Product>): Promise<Product> => {
-    const res = await fetch(`${API_URL}/products/${id}`, {
+    const res = await fetchWithAuth(`${API_URL}/products/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(updates)
     });
     if (!res.ok) throw new Error('Failed to update product');
-    const p = await res.json();
+    const data = await res.json();
     return {
-      id: p.id,
-      name: p.name,
-      category: p.category?.name || 'Uncategorized',
-      price: p.price.toString(),
-      originalPrice: p.originalPrice ? p.originalPrice.toString() : undefined,
-      image: p.image,
-      stock: p.stock,
-      status: 'active'
+      ...data,
+      category: typeof data.category === 'object' ? data.category.name : data.category,
+      price: data.price.toString(),
+      originalPrice: data.originalPrice ? data.originalPrice.toString() : undefined,
+      status: data.status || 'active'
     };
   },
 
   deleteProduct: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_URL}/products/${id}`, {
+    const res = await fetchWithAuth(`${API_URL}/products/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });

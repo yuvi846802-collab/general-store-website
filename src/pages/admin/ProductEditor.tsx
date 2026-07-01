@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Save, UploadCloud, Trash2, X, Plus, Info } from "lucide-react";
 import { motion } from "framer-motion";
-import { createProduct, ProductFormData } from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
+import { createProduct, fetchPublicCategories, ProductFormData } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProductEditor() {
@@ -10,12 +11,13 @@ export default function AdminProductEditor() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("general");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
-    category: "Grocery Items",
+    category: "", // Will be set automatically when categories load
     price: "",
     originalPrice: "",
     stock: "",
@@ -23,9 +25,38 @@ export default function AdminProductEditor() {
     image: ""
   });
 
+  // Fetch real categories
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ['public-categories'],
+    queryFn: fetchPublicCategories,
+    refetchInterval: 2000
+  });
+
+  // Automatically set first category as default if none selected
+  useEffect(() => {
+    if (formData.category === "" && dbCategories.length > 0) {
+      setFormData(prev => ({ ...prev, category: dbCategories[0].name }));
+    }
+  }, [dbCategories, formData.category]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("File size must be less than 2MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async () => {
@@ -119,11 +150,13 @@ export default function AdminProductEditor() {
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
                   <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
-                    <option value="Grocery Items">Grocery Items</option>
-                    <option value="Beverages">Beverages</option>
-                    <option value="Snacks">Snacks</option>
-                    <option value="Household Essentials">Household Essentials</option>
-                    <option value="Personal Care">Personal Care</option>
+                    {dbCategories.length === 0 ? (
+                      <option value="">Loading categories...</option>
+                    ) : (
+                      dbCategories.map((cat: any) => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))
+                    )}
                   </select>
                 </div>
                 <div>
@@ -173,12 +206,25 @@ export default function AdminProductEditor() {
           {/* Media & Images */}
           <motion.section id="media" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
             <h2 className="text-lg font-bold text-foreground mb-6">Media</h2>
-            <div className="border-2 border-dashed border-border hover:border-primary/50 bg-accent/20 rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer group">
-              <div className="w-16 h-16 bg-background rounded-full border border-border flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:border-primary/30 transition-all shadow-sm">
-                <UploadCloud size={28} className="text-primary" />
-              </div>
-              <h3 className="text-base font-bold text-foreground mb-1">Click to upload or drag and drop</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+            <div 
+              className="border-2 border-dashed border-border hover:border-primary/50 bg-accent/20 rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer group relative"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <input type="file" ref={imageInputRef} onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="hidden" />
+              {formData.image ? (
+                <div className="relative w-full flex justify-center">
+                  <img src={formData.image} alt="Preview" className="h-40 object-contain rounded-lg shadow-sm" />
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, image: ""})); }} className="absolute -top-3 -right-3 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow-sm"><X size={14}/></button>
+                </div>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-background rounded-full border border-border flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:border-primary/30 transition-all shadow-sm">
+                    <UploadCloud size={28} className="text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground mb-1">Click to upload or drag and drop</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+                </>
+              )}
             </div>
           </motion.section>
 

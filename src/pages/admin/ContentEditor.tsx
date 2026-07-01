@@ -1,8 +1,118 @@
 import { useState } from "react";
 import { useRoute } from "wouter";
-import { Save, Image as ImageIcon, Hash, MessageSquare, MapPin } from "lucide-react";
+import { Save, Image as ImageIcon, Hash, MessageSquare, MapPin, GripVertical, Trash2, Lightbulb, Share2 } from "lucide-react";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { Link2 } from "lucide-react";
+
+function SocialMediaEditor() {
+  const [links, setLinks] = useState([
+    { id: 1, name: "Instagram", url: "https://instagram.com/hakeemstore", enabled: true, isCustom: false },
+    { id: 2, name: "WhatsApp", url: "https://wa.me/919876543210", enabled: true, isCustom: false }
+  ]);
+
+  const addLink = () => {
+    const newId = links.length > 0 ? Math.max(...links.map(l => l.id)) + 1 : 1;
+    setLinks([...links, { id: newId, name: "New Link", url: "", enabled: true, isCustom: true }]);
+  };
+
+  const removeLink = (id: number) => {
+    setLinks(links.filter(l => l.id !== id));
+  };
+
+  const updateLink = (id: number, field: string, value: string | boolean) => {
+    setLinks(links.map(l => l.id === id ? { ...l, [field]: value } : l));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-card/50 border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="flex items-start gap-4 mb-8">
+          <div className="w-12 h-12 rounded-full bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
+            <Share2 size={24} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Social Media Links</h3>
+            <p className="text-sm text-muted-foreground mt-1">Add and manage your social media links. These will be displayed on your website.</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {links.map((link) => (
+            <div key={link.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border border-border bg-background/50 rounded-xl">
+              <div className="flex items-center gap-3 shrink-0">
+                <GripVertical size={18} className="text-muted-foreground cursor-grab" />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+                  link.name === "Instagram" ? "bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888]" : 
+                  link.name === "WhatsApp" ? "bg-[#25D366]" : "bg-primary/20 text-primary"
+                }`}>
+                  {link.name === "Instagram" ? <FaInstagram size={20} /> : 
+                   link.name === "WhatsApp" ? <FaWhatsapp size={20} /> : <Link2 size={20} />}
+                </div>
+                {link.isCustom ? (
+                  <input 
+                    type="text" 
+                    value={link.name} 
+                    onChange={(e) => updateLink(link.id, 'name', e.target.value)}
+                    className="font-semibold text-foreground w-24 bg-transparent border-b border-border focus:outline-none focus:border-primary" 
+                    placeholder="Name"
+                  />
+                ) : (
+                  <span className="font-semibold text-foreground w-24">{link.name}</span>
+                )}
+              </div>
+              <input 
+                type="text" 
+                value={link.url}
+                onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                placeholder="https://"
+                className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary" 
+              />
+              <div className="flex items-center gap-4 shrink-0">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={link.enabled}
+                    onChange={(e) => updateLink(link.id, 'enabled', e.target.checked)}
+                    className="sr-only peer" 
+                  />
+                  <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+                </label>
+                <button 
+                  onClick={() => removeLink(link.id)}
+                  className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors border border-border/50"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button 
+          onClick={addLink}
+          className="w-full mt-6 py-3 border-2 border-dashed border-teal-500/30 rounded-xl font-semibold text-teal-500 hover:bg-teal-500/5 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span> Add New Link
+        </button>
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex items-center gap-4 relative overflow-hidden">
+        <div className="w-12 h-12 rounded-full bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0 z-10">
+          <Lightbulb size={24} />
+        </div>
+        <div className="z-10">
+          <h3 className="text-base font-bold text-foreground">Tips</h3>
+          <p className="text-sm text-muted-foreground mt-1">Add your social media profiles to increase trust and engagement with your customers.</p>
+        </div>
+        <div className="absolute right-0 top-0 bottom-0 w-64 opacity-20 pointer-events-none flex items-center justify-end pr-8">
+          <Hash size={100} className="text-teal-500" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminContentEditor() {
   const [match, params] = useRoute("/admin/content/:section");
@@ -100,21 +210,7 @@ export default function AdminContentEditor() {
           </div>
         );
       case "social":
-        return (
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold text-foreground mb-6">Social Media Links</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#E1306C]/10 text-[#E1306C] rounded-lg flex items-center justify-center shrink-0"><Hash size={20}/></div>
-                <input type="text" defaultValue="https://instagram.com/hakeemstore" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary shadow-sm" />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#25D366]/10 text-[#25D366] rounded-lg flex items-center justify-center shrink-0"><MessageSquare size={20}/></div>
-                <input type="text" defaultValue="https://wa.me/919876543210" className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary shadow-sm" />
-              </div>
-            </div>
-          </div>
-        );
+        return <SocialMediaEditor />;
       case "contact":
         return (
           <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">

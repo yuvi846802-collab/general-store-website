@@ -1,11 +1,10 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, ShoppingCart, ChevronLeft, ChevronRight, LayoutGrid, LayoutList } from "lucide-react";
-
 import { CategoryCard } from "../features/products/CategoryCard";
-import { categories } from "../constants/data";
-import { productsData } from "../constants/products";
 import { getImageUrl } from "../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPublicProducts, fetchPublicCategories } from "../services/api";
 
 // Use React.memo to prevent unnecessary re-renders
 const MemoizedCategoryCard = React.memo(CategoryCard);
@@ -54,10 +53,41 @@ export default function ProductCategories() {
     }
   };
 
+  // Fetch products from real backend
+  const { data: dbProducts = [] } = useQuery({
+    queryKey: ['public-products'],
+    queryFn: fetchPublicProducts,
+    refetchInterval: 2000 // Real-time updates every 2 seconds
+  });
+
+  // Fetch categories from real backend
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ['public-categories'],
+    queryFn: fetchPublicCategories,
+    refetchInterval: 2000 // Real-time updates every 2 seconds
+  });
+
+  // Group products by category dynamically
+  const groupedProducts = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    dbProducts.forEach((p: any) => {
+      const catName = p.category?.name || "Uncategorized";
+      if (!grouped[catName]) grouped[catName] = [];
+      grouped[catName].push({
+        id: p.id,
+        name: p.name,
+        price: `₹${p.price.toFixed(2)}`,
+        image: p.image,
+        tag: p.isPopular ? "Bestseller" : (p.tag || ""),
+      });
+    });
+    return grouped;
+  }, [dbProducts]);
+
   // Memoize the selected products array
   const currentProducts = useMemo(() => {
-    return selectedCategory ? productsData[selectedCategory] || [] : [];
-  }, [selectedCategory]);
+    return selectedCategory ? groupedProducts[selectedCategory] || [] : [];
+  }, [selectedCategory, groupedProducts]);
 
   return (
     <section id="products" className="py-24 bg-muted/20">
@@ -77,7 +107,7 @@ export default function ProductCategories() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {categories.map((cat, index) => (
+          {dbCategories.map((cat: any, index: number) => (
             <MemoizedCategoryCard 
               key={cat.id} 
               category={cat} 
@@ -115,12 +145,12 @@ export default function ProductCategories() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between mt-14 md:mt-0 md:ml-16 mb-10 gap-5">
                   <div>
-                    <h3 className="text-3xl md:text-[40px] font-bold text-foreground tracking-tight mb-2 leading-none font-heading">{selectedCategory}</h3>
+                    <h3 className="text-3xl md:text-[40px] font-bold text-white tracking-tight mb-2 leading-none font-heading">{selectedCategory}</h3>
                     <p className="text-[#8B95A5] text-[15px]">Showing popular items in this category</p>
                   </div>
                   <button 
                     onClick={() => setShowAllItems(!showAllItems)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-foreground text-sm font-semibold transition-colors bg-transparent hover:bg-accent/50"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-white text-sm font-semibold transition-colors bg-transparent hover:bg-accent/50"
                   >
                     {showAllItems ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
                     {showAllItems ? "View as Carousel" : "View All Items"}
@@ -136,7 +166,7 @@ export default function ProductCategories() {
                       {/* Scroll left */}
                       <button 
                         onClick={() => scroll('left')} 
-                        className="absolute -left-4 md:-left-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
+                        className="absolute -left-4 md:-left-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-muted-foreground hover:text-white shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
                         aria-label="Scroll left"
                       >
                         <ChevronLeft size={24} />
@@ -145,7 +175,7 @@ export default function ProductCategories() {
                       {/* Scroll right */}
                       <button 
                         onClick={() => scroll('right')} 
-                        className="absolute -right-4 md:-right-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
+                        className="absolute -right-4 md:-right-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-muted-foreground hover:text-white shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
                         aria-label="Scroll right"
                       >
                         <ChevronRight size={24} />
@@ -193,17 +223,17 @@ export default function ProductCategories() {
                               </div>
                             )}
                             
-                            <h4 className="text-foreground font-bold text-[17px] leading-snug mb-3 flex-1">{product.name}</h4>
+                            <h4 className="text-white font-bold text-[17px] leading-snug mb-3 flex-1">{product.name}</h4>
                             
-                            <div className="text-foreground font-bold text-[22px] mb-4">
+                            <div className="text-white font-bold text-[22px] mb-4">
                               {product.price}
                             </div>
 
                             <div className="flex items-center gap-3 mt-1">
-                              <button className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors focus:outline-none">
+                              <button className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-white hover:bg-accent/50 transition-colors focus:outline-none">
                                 <ShoppingCart size={18} />
                               </button>
-                              <button className="flex-1 h-10 bg-[#10b981] hover:bg-[#059669] text-foreground rounded-xl font-semibold text-[15px] transition-colors focus:outline-none">
+                              <button className="flex-1 h-10 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl font-semibold text-[15px] transition-colors focus:outline-none">
                                 Add
                               </button>
                             </div>

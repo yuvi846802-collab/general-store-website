@@ -4,7 +4,7 @@ import { User, authService } from '@/services/authService';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -17,19 +17,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check initial auth state
-    const currentUser = authService.getCurrentUser();
-    const isAuth = authService.isAuthenticated();
-    
-    if (currentUser && isAuth) {
-      setUser(currentUser);
-      setIsAuthenticated(true);
-    }
-    
-    setIsLoading(false);
+    const initAuth = async () => {
+      try {
+        const currentUser = await authService.fetchCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setIsAuthenticated(true);
+        }
+      } catch (e) {
+        console.error("Auth init failed", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initAuth();
   }, []);
 
-  const login = (newUser: User, token: string) => {
+  const login = (newUser: User) => {
     setUser(newUser);
     setIsAuthenticated(true);
   };

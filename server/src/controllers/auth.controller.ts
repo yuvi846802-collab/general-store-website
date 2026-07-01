@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-hakeem-store-key';
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
@@ -33,18 +33,32 @@ export const login = async (req: Request, res: Response) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
+    res.cookie('admin_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.status(200).json({
       message: 'Login successful',
-      token,
       user: userWithoutPassword
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };
 
-export const getMe = async (req: Request, res: Response) => {
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
+export const getMe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Assuming auth middleware sets req.user
     const userId = (req as any).user?.id;
@@ -60,7 +74,6 @@ export const getMe = async (req: Request, res: Response) => {
     const { password: _, ...userWithoutPassword } = user;
     res.status(200).json({ user: userWithoutPassword });
   } catch (error) {
-    console.error('GetMe error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };

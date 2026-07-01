@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { 
   X, Package, Tag, ShoppingCart, Users, Box, Percent, Megaphone, 
   Star, Share2, Image as ImageIcon, FileText, ShieldCheck, 
@@ -58,9 +58,9 @@ export default function QuickCreateModal({ isOpen, onClose }: QuickCreateModalPr
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleNavigate = (id: string) => {
-    onClose();
-    setLocation(`/admin/create/${id}`);
+  const getActionPath = (id: string) => {
+    if (id === 'product') return '/admin/products/new';
+    return `/admin/create/${id}`;
   };
 
   return (
@@ -95,18 +95,18 @@ export default function QuickCreateModal({ isOpen, onClose }: QuickCreateModalPr
                 {CREATE_ACTIONS.map((action) => {
                   const Icon = action.icon;
                   return (
-                    <motion.button
-                      key={action.id}
-                      whileHover={{ scale: 1.03, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => handleNavigate(action.id)}
-                      className="flex flex-col items-center justify-center p-4 gap-3 bg-background border border-border hover:border-primary/50 rounded-xl transition-all shadow-sm hover:shadow-md group text-center"
-                    >
-                      <div className={`p-3 rounded-xl ${action.bg} ${action.color} group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon size={24} />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground">{action.label}</span>
-                    </motion.button>
+                    <Link href={getActionPath(action.id)} onClick={onClose} key={action.id}>
+                      <motion.a
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="flex flex-col items-center justify-center p-4 gap-3 bg-background border border-border hover:border-primary/50 rounded-xl transition-all shadow-sm hover:shadow-md group text-center cursor-pointer h-full"
+                      >
+                        <div className={`p-3 rounded-xl ${action.bg} ${action.color} group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon size={24} />
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{action.label}</span>
+                      </motion.a>
+                    </Link>
                   );
                 })}
               </div>

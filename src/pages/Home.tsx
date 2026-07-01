@@ -10,7 +10,6 @@ const StatsSection = React.lazy(() => import("@/components/StatsSection"));
 const ReviewsSection = React.lazy(() => import("@/components/ReviewsSection"));
 const InstagramSection = React.lazy(() => import("@/components/InstagramSection"));
 const ContactSection = React.lazy(() => import("@/components/ContactSection"));
-const CTASection = React.lazy(() => import("@/components/CTASection"));
 const Footer = React.lazy(() => import("@/components/Footer"));
 
 export default function Home() {
@@ -27,7 +26,6 @@ export default function Home() {
           <ReviewsSection />
           <InstagramSection />
           <ContactSection />
-          <CTASection />
         </Suspense>
       </main>
       <Suspense fallback={<div className="py-10 bg-[#0f172a]" />}>

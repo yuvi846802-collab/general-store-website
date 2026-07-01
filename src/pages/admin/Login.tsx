@@ -50,7 +50,7 @@ export default function AdminLogin() {
     setIsLoading(true);
     try {
       const response = await authService.login(data.email, data.password);
-      login(response.user, response.token);
+      login(response.user);
       toast({
         title: "Welcome back",
         description: "Successfully logged into the admin dashboard.",
@@ -329,7 +329,7 @@ export default function AdminLogin() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full relative overflow-hidden bg-gradient-to-r from-[#2DD4BF] to-[#8B5CF6] text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(45,212,191,0.4)] hover:scale-[1.01] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed group shadow-md"
+                className="w-full relative overflow-hidden bg-teal-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:bg-teal-700 hover:shadow-[0_0_20px_rgba(13,148,136,0.4)] hover:scale-[1.01] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed group shadow-md"
               >
                 {isLoading ? (
                   <>

@@ -1,4 +1,4 @@
-import { getAuthHeaders } from './api';
+import { getAuthHeaders, fetchWithAuth, API_URL } from './api';
 
 export interface StoreSettings {
   id: string;
@@ -26,15 +26,14 @@ export interface StoreSettings {
 
 export const settingsService = {
   getSettings: async (): Promise<StoreSettings> => {
-    const response = await fetch('http://localhost:5000/api/settings');
+    const response = await fetchWithAuth(`${API_URL}/settings`);
     if (!response.ok) throw new Error('Failed to fetch settings');
     return response.json();
   },
   
   updateSettings: async (data: Partial<StoreSettings>): Promise<StoreSettings> => {
-    const response = await fetch('http://localhost:5000/api/settings', {
+    const response = await fetchWithAuth(`${API_URL}/settings`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error('Failed to update settings');

@@ -1,4 +1,4 @@
-import { getAuthHeaders } from './api';
+import { getAuthHeaders, fetchWithAuth, API_URL } from './api';
 
 export interface Category {
   id: string;
@@ -12,11 +12,11 @@ export interface Category {
   };
 }
 
-const API_URL = 'http://localhost:5000/api';
+
 
 export const categoryService = {
   getCategories: async (): Promise<Category[]> => {
-    const res = await fetch(`${API_URL}/categories`, {
+    const res = await fetchWithAuth(`${API_URL}/categories`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error('Failed to fetch categories');
@@ -24,9 +24,8 @@ export const categoryService = {
   },
 
   createCategory: async (category: Omit<Category, 'id' | '_count'>): Promise<Category> => {
-    const res = await fetch(`${API_URL}/categories`, {
+    const res = await fetchWithAuth(`${API_URL}/categories`, {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify(category)
     });
     if (!res.ok) throw new Error('Failed to create category');
@@ -34,9 +33,8 @@ export const categoryService = {
   },
 
   updateCategory: async (id: string, updates: Partial<Category>): Promise<Category> => {
-    const res = await fetch(`${API_URL}/categories/${id}`, {
+    const res = await fetchWithAuth(`${API_URL}/categories/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
       body: JSON.stringify(updates)
     });
     if (!res.ok) throw new Error('Failed to update category');
@@ -44,9 +42,8 @@ export const categoryService = {
   },
 
   deleteCategory: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_URL}/categories/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
+    const res = await fetchWithAuth(`${API_URL}/categories/${id}`, {
+      method: 'DELETE'
     });
     if (!res.ok) throw new Error('Failed to delete category');
   }

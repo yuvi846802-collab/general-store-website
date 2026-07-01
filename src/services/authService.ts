@@ -1,3 +1,5 @@
+import { API_URL, fetchWithAuth } from './api';
+
 export interface User {
   id: string;
   name: string;
@@ -6,13 +8,16 @@ export interface User {
   avatar?: string;
 }
 
+let currentUser: User | null = null;
+
 export const authService = {
-  login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
+  login: async (email: string, password: string): Promise<{ user: User }> => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
+        credentials: 'include' // Important for setting the cookie
       });
 
       const data = await response.json();
@@ -21,36 +26,46 @@ export const authService = {
         throw new Error(data.error || 'Invalid email or password');
       }
 
-      const { user, token } = data;
-      
-      // Persist to local storage
-      localStorage.setItem('admin_token', token);
-      localStorage.setItem('admin_user', JSON.stringify(user));
-      
-      return { user, token };
+      currentUser = data.user;
+      return { user: data.user };
     } catch (error: any) {
-      throw new Error(error.message || 'Failed to connect to server');
+      throw error;
     }
   },
 
-  logout: () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_user');
+  logout: async (): Promise<void> => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (e) {
+      console.error("Failed to call logout on server", e);
+    } finally {
+      currentUser = null;
+    }
+  },
+
+  fetchCurrentUser: async (): Promise<User | null> => {
+    try {
+      const response = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
+      const data = await response.json();
+      if (response.ok) {
+        currentUser = data.user;
+        return currentUser;
+      }
+      return null;
+    } catch (e) {
+      currentUser = null;
+      return null;
+    }
   },
 
   getCurrentUser: (): User | null => {
-    const userStr = localStorage.getItem('admin_user');
-    if (userStr) {
-      try {
-        return JSON.parse(userStr);
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
+    return currentUser;
   },
 
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem('admin_token');
+    return !!currentUser;
   }
 };

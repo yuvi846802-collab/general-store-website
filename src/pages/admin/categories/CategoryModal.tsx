@@ -63,7 +63,7 @@ export function CategoryModal({ isOpen, onClose, onSubmit, isSubmitting, error }
     }
   }, [watchName, setValue]);
 
-  // Handle Image Uploads (Simulation)
+  // Handle Image Uploads (Base64)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, setPreview: (val: string | null) => void) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -71,8 +71,11 @@ export function CategoryModal({ isOpen, onClose, onSubmit, isSubmitting, error }
         alert("File size must be less than 2MB");
         return;
       }
-      const url = URL.createObjectURL(file);
-      setPreview(url);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
