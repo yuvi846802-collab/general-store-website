@@ -61,7 +61,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
       title: "Content",
       items: [
         { icon: Hash, label: "Social Media", path: "/admin/content/social" },
-        { icon: ImageIcon, label: "Hero Section", path: "/admin/content/hero" },
+        { icon: ImageIcon, label: "Hero Settings", path: "/admin/hero" },
         { icon: Info, label: "About", path: "/admin/content/about" },
         { icon: ShieldCheck, label: "Why Choose Us", path: "/admin/content/why-us" },
         { icon: BarChart3, label: "Statistics", path: "/admin/content/stats" },

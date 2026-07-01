@@ -71,7 +71,7 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-background flex text-foreground font-sans selection:bg-primary/30">
       
       {/* Left Side - Deep Space Branding */}
-      <div className="hidden lg:flex w-1/2 relative bg-[#090B14] overflow-hidden flex-col justify-between p-12 xl:p-16 border-r border-border/10">
+      <div className="hidden lg:flex w-1/2 relative bg-card overflow-hidden flex-col justify-between p-12 xl:p-16 border-r border-border/10">
         
         {/* Abstract Aurora Glowing Background */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -80,7 +80,7 @@ export default function AdminLogin() {
           <div className="absolute bottom-[-10%] left-[10%] w-[80%] h-[80%] bg-cyan-600/10 rounded-full blur-[150px] mix-blend-screen" />
         </div>
         
-        <div className="relative z-10 text-white max-w-[600px] w-full mx-auto flex flex-col h-full justify-center">
+        <div className="relative z-10 text-foreground max-w-[600px] w-full mx-auto flex flex-col h-full justify-center">
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -103,7 +103,7 @@ export default function AdminLogin() {
             {/* Trust Badge */}
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8 w-fit backdrop-blur-md">
               <ShieldCheck size={14} className="text-teal-400" />
-              <span className="text-xs font-medium text-gray-300">Trusted by 25,000+ Businesses</span>
+              <span className="text-xs font-medium text-muted-foreground">Trusted by 25,000+ Businesses</span>
             </div>
 
             {/* Main Title */}
@@ -112,7 +112,7 @@ export default function AdminLogin() {
               <span className="text-teal-400">Smarter</span>, <span className="text-cyan-400">Faster</span>, <span className="text-purple-400">Better</span>
             </h1>
             
-            <p className="text-lg text-gray-400 font-medium leading-relaxed max-w-lg mb-12">
+            <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-lg mb-12">
               The all-in-one enterprise dashboard designed to help you grow, analyze and scale effortlessly.
             </p>
             
@@ -124,7 +124,7 @@ export default function AdminLogin() {
                 </div>
                 <div>
                   <h3 className="font-bold text-sm mb-1">Secure & Encrypted</h3>
-                  <p className="text-xs text-gray-500 font-medium">256-bit protection</p>
+                  <p className="text-xs text-muted-foreground font-medium">256-bit protection</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -133,7 +133,7 @@ export default function AdminLogin() {
                 </div>
                 <div>
                   <h3 className="font-bold text-sm mb-1">99.99% Uptime</h3>
-                  <p className="text-xs text-gray-500 font-medium">Reliable & Fast</p>
+                  <p className="text-xs text-muted-foreground font-medium">Reliable & Fast</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -142,7 +142,7 @@ export default function AdminLogin() {
                 </div>
                 <div>
                   <h3 className="font-bold text-sm mb-1">Role Management</h3>
-                  <p className="text-xs text-gray-500 font-medium">Team & Permissions</p>
+                  <p className="text-xs text-muted-foreground font-medium">Team & Permissions</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -151,13 +151,13 @@ export default function AdminLogin() {
                 </div>
                 <div>
                   <h3 className="font-bold text-sm mb-1">Real-time Analytics</h3>
-                  <p className="text-xs text-gray-500 font-medium">Live Business Insights</p>
+                  <p className="text-xs text-muted-foreground font-medium">Live Business Insights</p>
                 </div>
               </div>
             </div>
 
             {/* CSS Dashboard Mockup */}
-            <div className="relative w-full h-[220px] rounded-t-xl border border-white/10 bg-[#0F1423] p-4 overflow-hidden shadow-2xl flex flex-col opacity-90">
+            <div className="relative w-full h-[220px] rounded-t-xl border border-border/10 bg-background p-4 overflow-hidden shadow-2xl flex flex-col opacity-90">
               <div className="absolute top-0 left-0 w-full h-8 bg-black/40 border-b border-white/5 flex items-center px-4 gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
@@ -204,14 +204,14 @@ export default function AdminLogin() {
                   </div>
                 </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090B14] via-transparent to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent z-10 pointer-events-none"></div>
             </div>
 
             {/* Footer Users */}
             <div className="mt-8 flex items-center gap-4">
               <div className="flex -space-x-3">
                 {['https://i.pravatar.cc/100?img=1', 'https://i.pravatar.cc/100?img=2', 'https://i.pravatar.cc/100?img=3', 'https://i.pravatar.cc/100?img=4'].map((src, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#090B14] bg-zinc-800 overflow-hidden shadow-lg">
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-card bg-muted overflow-hidden shadow-lg">
                     <img src={src} alt="User" className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -220,7 +220,7 @@ export default function AdminLogin() {
                 <div className="flex text-yellow-500 mb-0.5">
                   {[1,2,3,4,5].map(i => <Star key={i} size={12} fill="currentColor" />)}
                 </div>
-                <span className="text-xs text-gray-400 font-medium">Loved by 10,000+ users worldwide</span>
+                <span className="text-xs text-muted-foreground font-medium">Loved by 10,000+ users worldwide</span>
               </div>
             </div>
             

@@ -28,7 +28,7 @@ export default function Home() {
           <ContactSection />
         </Suspense>
       </main>
-      <Suspense fallback={<div className="py-10 bg-[#0f172a]" />}>
+      <Suspense fallback={<div className="py-10 bg-background" />}>
         <Footer />
       </Suspense>
     </div>

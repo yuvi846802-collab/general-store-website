@@ -5,10 +5,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/Home"));
 const Page = lazy(() => import("@/pages/Page"));
+const UserProfile = lazy(() => import("@/pages/user/Profile"));
+
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import VerifyEmail from "@/pages/auth/VerifyEmail";
 
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -24,6 +32,7 @@ import AdminMediaLibrary from "@/pages/admin/MediaLibrary";
 import AdminUsers from "@/pages/admin/Users";
 import AdminProfile from "@/pages/admin/Profile";
 import AdminContentEditor from "@/pages/admin/ContentEditor";
+import AdminHeroManager from "@/pages/admin/HeroManager";
 import AdminInventory from "@/pages/admin/Inventory";
 import AdminCoupons from "@/pages/admin/Coupons";
 import AdminMarketing from "@/pages/admin/Marketing";
@@ -49,6 +58,15 @@ function Router() {
         <Route path="/track-order" component={Page} />
         <Route path="/contact" component={Page} />
         
+        {/* Auth Routes */}
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password/:token" component={ResetPassword} />
+        <Route path="/api/auth/verify-email" component={VerifyEmail} />
+        <Route path="/verify-email" component={VerifyEmail} />
+        <Route path="/profile" component={UserProfile} />
+        
         {/* Admin Public Route */}
         <Route path="/admin/login" component={AdminLogin} />
 
@@ -69,6 +87,7 @@ function Router() {
               <Route path="/admin/media"><AdminMediaLibrary /></Route>
               <Route path="/admin/users"><AdminUsers /></Route>
               <Route path="/admin/profile"><AdminProfile /></Route>
+              <Route path="/admin/hero"><AdminHeroManager /></Route>
               <Route path="/admin/content/:section"><AdminContentEditor /></Route>
               <Route path="/admin/coupons"><AdminCoupons /></Route>
               <Route path="/admin/marketing"><AdminMarketing /></Route>
@@ -96,6 +115,7 @@ function App() {
             <AuthProvider>
               <TooltipProvider>
                 <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                  <CartDrawer />
                   <Router />
                 </WouterRouter>
                 <Toaster />

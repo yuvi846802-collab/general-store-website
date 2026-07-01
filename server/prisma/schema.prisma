@@ -9,18 +9,53 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                      String     @id @default(uuid())
+  firstName               String?
+  lastName                String?
+  name                    String?
+  email                   String     @unique
+  phone                   String?    @unique
+  password                String
+  role                    String     @default("USER")
+  profileImage            String?
+  isVerified              Boolean    @default(false)
+  verificationToken       String?
+  verificationTokenExpiry DateTime?
+  resetPasswordToken      String?
+  resetPasswordExpiry     DateTime?
+  referralCode            String?
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
 
-  orders    Order[]
-  cart      Cart?
-  reviews   Review[]
-  wishlist  Wishlist?
+  orders                  Order[]
+  cart                    Cart?
+  reviews                 Review[]
+  wishlist                Wishlist?
+  sessions                Session[]
+  auditLogs               AuditLog[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  refreshToken String   @unique
+  deviceInfo   String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 
@@ -168,4 +203,27 @@ model StoreSettings {
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model HeroSlide {
+  id                String   @id @default(uuid())
+  image             String
+  badgeText         String?
+  heading           String
+  highlightText     String?
+  description       String?
+  primaryBtnText    String?
+  primaryBtnLink    String?
+  secondaryBtnText  String?
+  secondaryBtnLink  String?
+  overlayColor      String   @default("dark") // 'dark', 'light', 'gradient'
+  opacity           Float    @default(0.5)
+  textAlignment     String   @default("left") // 'left', 'center', 'right'
+  ctaVisible        Boolean  @default(true)
+  displayOrder      Int      @default(0)
+  isActive          Boolean  @default(true)
+  autoPlaySpeed     Int      @default(5000)
+  transitionDuration Int     @default(1000)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

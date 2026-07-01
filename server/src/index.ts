@@ -5,7 +5,8 @@ import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { logger } from './utils/logger';
-import { errorHandler } from './middleware/errorHandler';
+import { globalErrorHandler } from './middlewares/error.middleware';
+import { AppError } from './utils/appError';
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per `window`
+  limit: 1000, // Increased limit to 1000 for development and heavy usage
   message: { error: 'Too many requests from this IP, please try again later.' }
 });
 app.use('/api', limiter);
@@ -50,12 +51,16 @@ import authRoutes from './routes/auth.routes';
 import categoryRoutes from './routes/category.routes';
 import productRoutes from './routes/product.routes';
 import settingsRoutes from './routes/settings.routes';
+import heroRoutes from './routes/hero.routes';
+import userRoutes from './routes/user.routes';
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/hero', heroRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
@@ -63,12 +68,12 @@ app.get('/health', (req, res) => {
 });
 
 // Handle 404 for undefined routes
-app.use((req, res, next) => {
-  res.status(404).json({ error: 'Route not found' });
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 // Global Error Handler
-app.use(errorHandler);
+app.use(globalErrorHandler);
 
 // Start Server
 app.listen(PORT, () => {

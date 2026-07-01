@@ -5,12 +5,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const cartItems = useCartStore((state) => state.items);
+  const toggleCart = useCartStore((state) => state.toggleCart);
+  const { isAuthenticated, user } = useAuthStore();
+
+  const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,9 +66,9 @@ export default function Navbar() {
           <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About Us
           </a>
-          <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer group">
+          <a href="#products" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer group">
             Products <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
-          </div>
+          </a>
           <a href="#why-us" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Why Us
           </a>
@@ -87,23 +94,39 @@ export default function Navbar() {
 
           <ThemeToggle />
 
-          <button 
-            onClick={() => setLocation("/admin/login")}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
-            aria-label="User account"
-          >
-            <User size={18} />
-          </button>
+          {isAuthenticated && user ? (
+            <button 
+              onClick={() => setLocation(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? '/admin/profile' : '/profile')}
+              className="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 border border-transparent hover:border-border"
+            >
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase shrink-0">
+                {user.name ? user.name.charAt(0) : (user.email ? user.email.charAt(0) : <User size={14} />)}
+              </div>
+              <span className="text-sm font-semibold hidden sm:block max-w-[100px] truncate">
+                {user.name || user.email.split('@')[0]}
+              </span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => setLocation("/login")}
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+              aria-label="User account"
+            >
+              <User size={18} />
+            </button>
+          )}
 
           <button 
-            onClick={() => toast({ title: "Shopping Cart", description: "Your cart is currently empty." })}
+            onClick={toggleCart}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors relative mr-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            aria-label="Shopping cart with 2 items"
+            aria-label={`Shopping cart with ${cartItemsCount} items`}
           >
             <ShoppingCart size={18} />
-            <span className="absolute top-0 right-0 w-4 h-4 bg-green-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-2 border-background" aria-hidden="true">
-              2
-            </span>
+            {cartItemsCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-green-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-background shadow-sm" aria-hidden="true">
+                {cartItemsCount > 99 ? '99+' : cartItemsCount}
+              </span>
+            )}
           </button>
           
           <a href="tel:+917896541230" aria-label="Call Hakeem Store">

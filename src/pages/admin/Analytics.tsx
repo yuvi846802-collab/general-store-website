@@ -124,8 +124,8 @@ export default function AdminAnalytics() {
                 contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
                 itemStyle={{ fontWeight: 'bold' }}
               />
-              <Bar yAxisId="left" dataKey="revenue" fill="#2563EB" radius={[4, 4, 0, 0]} maxBarSize={40} name="Revenue (₹)" />
-              <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#10B981" strokeWidth={3} dot={{r: 4, fill: '#10B981', strokeWidth: 2, stroke: '#fff'}} name="Orders" />
+              <Bar yAxisId="left" dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={40} name="Revenue (₹)" />
+              <Line yAxisId="right" type="monotone" dataKey="orders" stroke="hsl(var(--chart-2))" strokeWidth={3} dot={{r: 4, fill: 'hsl(var(--chart-2))', strokeWidth: 2, stroke: 'hsl(var(--background))'}} name="Orders" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
