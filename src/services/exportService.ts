@@ -17,17 +17,13 @@ export const exportService = {
     const filteredData = data.map(item => {
       const filteredItem: any = {};
       config.columns.forEach(col => {
-        // Map common internal keys to user-friendly column names
-        const keyMap: any = {
-          'Product Name': 'name',
-          'SKU': 'id',
-          'Category': 'category',
-          'Price': 'price',
-          'Inventory': 'stock',
-          'Status': 'status'
-        };
-        const internalKey = keyMap[col] || col.toLowerCase();
-        filteredItem[col] = item[internalKey] !== undefined ? item[internalKey] : '';
+        if (col === 'Product Name') filteredItem[col] = item.name || '';
+        else if (col === 'SKU') filteredItem[col] = item.sku || item.id || '';
+        else if (col === 'Category') filteredItem[col] = item.category || '';
+        else if (col === 'Price') filteredItem[col] = item.price || '0';
+        else if (col === 'Inventory') filteredItem[col] = item.stock ?? item.inventory ?? 0;
+        else if (col === 'Status') filteredItem[col] = item.status || 'active';
+        else filteredItem[col] = item[col.toLowerCase()] ?? item[col] ?? '';
       });
       return filteredItem;
     });
@@ -55,10 +51,21 @@ export const exportService = {
   },
 
   downloadExcel: (data: any[], filename: string) => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
-    XLSX.writeFile(workbook, `${filename}.xlsx`);
+    try {
+      // Fallback to default if XLSX is nested (Vite CJS interop)
+      const xlsxLib = (XLSX as any).default || XLSX;
+      const worksheet = xlsxLib.utils.json_to_sheet(data);
+      const workbook = xlsxLib.utils.book_new();
+      xlsxLib.utils.book_append_sheet(workbook, worksheet, 'Products');
+      
+      // Generate ArrayBuffer and use our robust triggerDownload
+      const excelBuffer = xlsxLib.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      exportService.triggerDownload(blob, `${filename}.xlsx`);
+    } catch (err) {
+      console.error("Excel generation failed, falling back to CSV", err);
+      exportService.downloadCSV(data, filename);
+    }
   },
 
   downloadJSON: (data: any[], filename: string) => {

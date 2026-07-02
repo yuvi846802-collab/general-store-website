@@ -12,42 +12,42 @@ export default function AdminMarketing() {
   ];
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Marketing Campaigns</h1>
-          <p className="text-sm text-muted-foreground">Manage your email newsletters and promotional campaigns.</p>
+          <p className="text-sm text-muted-foreground">Manage your email newsletters and promotional campaigns in real-time.</p>
         </div>
         <button 
           onClick={() => toast({ title: "New Campaign", description: "Opening campaign builder..." })}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 shrink-0 cursor-pointer active:scale-95"
         >
           <Megaphone size={16} /> New Campaign
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
+        <div className="bg-card border border-border p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center shrink-0"><Mail size={24}/></div>
+            <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-500/20"><Mail size={24}/></div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground">Total Emails Sent</p>
               <h4 className="text-2xl font-bold text-foreground">45.2k</h4>
             </div>
           </div>
         </div>
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
+        <div className="bg-card border border-border p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center shrink-0"><Send size={24}/></div>
+            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-500/20"><Send size={24}/></div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground">Avg. Open Rate</p>
               <h4 className="text-2xl font-bold text-foreground">24.8%</h4>
             </div>
           </div>
         </div>
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
+        <div className="bg-card border border-border p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center shrink-0"><BarChart size={24}/></div>
+            <div className="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center shrink-0 border border-purple-500/20"><BarChart size={24}/></div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground">Avg. Click Rate</p>
               <h4 className="text-2xl font-bold text-foreground">8.4%</h4>
@@ -56,11 +56,11 @@ export default function AdminMarketing() {
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-border bg-muted/10">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[55vh] overflow-hidden">
+        <div className="p-5 border-b border-border bg-muted/20 shrink-0">
           <h3 className="font-bold text-foreground text-lg">Recent Campaigns</h3>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/5 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>

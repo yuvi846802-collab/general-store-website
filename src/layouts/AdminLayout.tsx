@@ -137,8 +137,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </header>
 
           {/* Page Content Scroll Area */}
-          <main id="main-scroll-area" className={`flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-8 pb-4 sm:pb-8 relative ${location.includes('/products/new') || (location.startsWith('/admin/products/') && location !== '/admin/products') ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
-            <div className="max-w-[1600px] mx-auto w-full">
+          <main id="main-scroll-area" className={`flex-1 flex flex-col overflow-x-hidden overflow-y-auto px-4 sm:px-8 pb-4 sm:pb-8 relative ${location.includes('/products/new') || (location.startsWith('/admin/products/') && location !== '/admin/products') ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
+            <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location}
@@ -146,6 +146,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                   exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
                   transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                  className="flex-1 flex flex-col w-full"
                 >
                   {children}
                 </motion.div>

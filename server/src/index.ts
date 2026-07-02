@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import { rateLimit } from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { logger } from './utils/logger';
@@ -20,7 +21,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
+      imgSrc: ["'self'", "data:", "blob:", "http://localhost:5000", "http://localhost:5173", process.env.FRONTEND_URL || 'http://localhost:5173'],
       connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:5173'],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -47,12 +48,16 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
+// Serve static files from public directory
+app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
+
 import authRoutes from './routes/auth.routes';
 import categoryRoutes from './routes/category.routes';
 import productRoutes from './routes/product.routes';
 import settingsRoutes from './routes/settings.routes';
 import heroRoutes from './routes/hero.routes';
 import userRoutes from './routes/user.routes';
+import uploadRoutes from './routes/upload.routes';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -61,6 +66,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/hero', heroRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

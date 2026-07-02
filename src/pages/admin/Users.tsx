@@ -15,35 +15,35 @@ export default function AdminUsers() {
   ];
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">System Users</h1>
-          <p className="text-sm text-muted-foreground">Manage admin access and user roles.</p>
+          <p className="text-sm text-muted-foreground">Manage admin access and user roles in real-time.</p>
         </div>
         <button 
           onClick={() => toast({ title: "Add User", description: "Opening new user form..." })}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 shrink-0 cursor-pointer active:scale-95"
         >
           <UserPlus size={16} /> Add User
         </button>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm flex flex-col">
-        <div className="p-4 border-b border-border bg-muted/20 rounded-t-2xl">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[75vh] overflow-hidden">
+        <div className="p-5 border-b border-border bg-muted/20 shrink-0">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input 
               type="text" 
               placeholder="Search users..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
+              className="w-full bg-background border border-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>

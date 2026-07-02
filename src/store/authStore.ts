@@ -54,15 +54,29 @@ export const useAuthStore = create<AuthState>()(
       checkAuth: async () => {
         set({ isLoading: true });
         try {
+          // Step 1: Refresh the access token using the httpOnly refresh cookie
+          const refreshRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json();
+            if (refreshData.accessToken) {
+              ApiClient.setAccessToken(refreshData.accessToken);
+            }
+          }
+
+          // Step 2: Fetch current user with the new token
           const res = await ApiClient.get('/auth/me');
           if (res.ok) {
             const data = await res.json();
             set({ user: data.user, isAuthenticated: true, error: null });
           } else {
-            // Attempt to refresh or logout
+            ApiClient.setAccessToken(null);
             set({ user: null, isAuthenticated: false });
           }
         } catch (error) {
+          ApiClient.setAccessToken(null);
           set({ user: null, isAuthenticated: false });
         } finally {
           set({ isLoading: false });

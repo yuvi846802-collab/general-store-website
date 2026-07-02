@@ -295,28 +295,14 @@ export type ProductFormData = {
   originalPrice?: number | string;
   category: string;
   stock?: number | string;
+  sku?: string;
+  barcode?: string;
+  tag?: string;
+  status?: string;
   isPopular?: boolean;
   image?: string;
 };
 
-export const createProduct = async (data: ProductFormData): Promise<any> => {
-  try {
-    const response = await fetchWithAuth(`${API_URL}/products`, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create product');
-    }
-
-    return result;
-  } catch (error: any) {
-    throw new Error(error.message || 'Failed to connect to server');
-  }
-};
 
 export const fetchPublicProducts = async (): Promise<any[]> => {
   try {
@@ -325,7 +311,7 @@ export const fetchPublicProducts = async (): Promise<any[]> => {
     if (!response.ok) {
       throw new Error(result.error || 'Failed to fetch products');
     }
-    return result;
+    return result.data || result;
   } catch (error: any) {
     console.error('Fetch public products error:', error);
     return [];

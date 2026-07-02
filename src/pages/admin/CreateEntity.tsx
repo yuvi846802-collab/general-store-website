@@ -3,7 +3,8 @@ import { useLocation, useParams } from 'wouter';
 import { entitySchemas } from '@/constants/schemas';
 import DynamicCreateForm from '@/components/admin/DynamicCreateForm';
 import { backendService } from '@/services/backendService';
-import { createProduct, createCategory } from '@/services/api';
+import { createCategory } from '@/services/api';
+import { productService } from '@/services/productService';
 import { ChevronRight, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -37,7 +38,7 @@ export default function CreateEntity() {
   const handleSubmit = async (data: any) => {
     // Route to real backend APIs if available
     if (entityType === 'product') {
-      await createProduct(data);
+      await productService.createProduct(data as any);
     } else if (entityType === 'category') {
       await createCategory(data);
     } else {

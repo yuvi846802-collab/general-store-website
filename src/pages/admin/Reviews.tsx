@@ -44,16 +44,16 @@ export default function AdminReviews() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Reviews</h1>
-          <p className="text-sm text-muted-foreground">Manage customer feedback and ratings.</p>
+          <p className="text-sm text-muted-foreground">Manage customer feedback and ratings in real-time.</p>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm flex flex-col">
-        <div className="p-4 border-b border-border flex items-center gap-4 bg-muted/20 rounded-t-2xl">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[75vh] overflow-hidden">
+        <div className="p-5 border-b border-border flex items-center gap-4 bg-muted/20 shrink-0">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input 
@@ -158,7 +158,7 @@ export default function AdminReviews() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>

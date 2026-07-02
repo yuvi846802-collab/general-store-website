@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Filter, Download, Eye, MoreHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { exportService } from "@/services/exportService";
 
 export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +25,19 @@ export default function AdminOrders() {
     const matchesStatus = statusFilter === "All Status" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleExportOrders = () => {
+    const exportData = filteredOrders.map(order => ({
+      "Order ID": order.id,
+      "Customer Name": order.customer,
+      "Order Date": order.date,
+      "Total Amount": order.amount,
+      "Order Status": order.status,
+    }));
+    const filename = `orders_export_${new Date().toISOString().split('T')[0]}`;
+    exportService.downloadCSV(exportData, filename);
+    toast({ title: "Export Successful", description: `Downloaded ${filename}.csv successfully.` });
+  };
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -48,23 +62,23 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Orders Management</h1>
-          <p className="text-sm text-muted-foreground">View and manage all customer orders.</p>
+          <p className="text-sm text-muted-foreground">View and manage all customer orders in real-time.</p>
         </div>
         <button 
-          onClick={() => toast({ title: "Export Started", description: "Your CSV file is being generated." })}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          onClick={handleExportOrders}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer active:scale-95 shrink-0"
         >
           <Download size={16} /> Export CSV
         </button>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm flex flex-col">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[75vh] overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-border flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-t-2xl">
+        <div className="p-5 border-b border-border flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 shrink-0">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input 
@@ -104,7 +118,7 @@ export default function AdminOrders() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>

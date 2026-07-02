@@ -94,27 +94,36 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
       {/* Header Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Products</h1>
-          <p className="text-sm text-muted-foreground">Manage your store's inventory and catalog.</p>
+          <p className="text-sm text-muted-foreground">Manage your store's inventory and catalog in real-time.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={() => setIsExportOpen(true)} className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-            <Download size={16} /> Export
+          <button 
+            onClick={() => setIsImportOpen(true)}
+            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <Upload size={16} /> Import
+          </button>
+          <button 
+            onClick={() => setIsExportOpen(true)}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <Download size={16} /> Export CSV
           </button>
           <button 
             onClick={() => setLocation('/admin/products/new')}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <Plus size={16} /> Add Product
           </button>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm flex flex-col">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[75vh] overflow-hidden">
         
         {/* Advanced Toolbar */}
         <div className="p-4 border-b border-border flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-t-2xl">
@@ -197,7 +206,7 @@ export default function AdminProducts() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>
@@ -326,10 +335,10 @@ export default function AdminProducts() {
           fetchProducts();
         }}
       />
-      
-      <ExportProductsModal 
-        isOpen={isExportOpen} 
-        onClose={() => setIsExportOpen(false)} 
+
+      <ExportProductsModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
         filteredProducts={filteredProducts}
         allProducts={products}
       />

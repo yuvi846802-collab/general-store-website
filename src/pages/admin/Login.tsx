@@ -37,7 +37,7 @@ export default function AdminLogin() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@hakeemstore.com",
+      email: "yuvrajpaajisardar@gmail.com",
       password: "admin123",
       rememberMe: false,
     },
@@ -271,7 +271,7 @@ export default function AdminLogin() {
                     className={`w-full bg-background border ${
                       errors.email ? "border-destructive focus:ring-destructive/20" : "border-input focus:border-teal-500 focus:ring-teal-500/20"
                     } rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-4 transition-all duration-300 shadow-sm`}
-                    placeholder="admin@hakeemstore.com"
+                    placeholder="yuvrajpaajisardar@gmail.com"
                   />
                   {isEmailValid && !errors.email && (
                     <CheckCircle2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-500" />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Download, MoreHorizontal, Mail, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { exportService } from "@/services/exportService";
 
 export default function AdminCustomers() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,38 +23,52 @@ export default function AdminCustomers() {
            customer.email.toLowerCase().includes(searchLower);
   });
 
+  const handleExportCustomers = () => {
+    const exportData = filteredCustomers.map(c => ({
+      "Customer ID": c.id,
+      "Name": c.name,
+      "Email": c.email,
+      "Orders Count": c.orders,
+      "Total Spent": c.spent,
+      "Status": c.status,
+    }));
+    const filename = `customers_export_${new Date().toISOString().split('T')[0]}`;
+    exportService.downloadCSV(exportData, filename);
+    toast({ title: "Export Successful", description: `Downloaded ${filename}.csv successfully.` });
+  };
+
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-6rem)] w-full space-y-6 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground mb-1">Customers</h1>
-          <p className="text-sm text-muted-foreground">Manage your store's user base.</p>
+          <p className="text-sm text-muted-foreground">Manage your store's user base in real-time.</p>
         </div>
         <button 
-          onClick={() => toast({ title: "Export Started", description: "Customer list CSV is being generated." })}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          onClick={handleExportCustomers}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer active:scale-95 shrink-0"
         >
           <Download size={16} /> Export CSV
         </button>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm flex flex-col">
+      <div className="bg-card border border-border rounded-3xl shadow-lg flex flex-col flex-1 w-full min-h-[75vh] overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-border flex items-center gap-4 bg-muted/20 rounded-t-2xl">
+        <div className="p-5 border-b border-border flex items-center gap-4 bg-muted/20 shrink-0">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input 
               type="text" 
               placeholder="Search by name or email..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
+              className="w-full bg-background border border-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm transition-all"
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1 w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               <tr>

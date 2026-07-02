@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-hakeem-store-key';
+if (!process.env.JWT_SECRET) {
+  throw new Error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Extend Express Request to include user payload
 export interface AuthRequest extends Request {

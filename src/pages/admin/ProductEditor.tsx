@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Save, UploadCloud, Trash2, X, Plus, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { createProduct, fetchPublicCategories, ProductFormData } from "@/services/api";
+import { fetchPublicCategories, ProductFormData } from "@/services/api";
+import { productService } from "@/services/productService";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProductEditor() {
@@ -21,9 +22,14 @@ export default function AdminProductEditor() {
     price: "",
     originalPrice: "",
     stock: "",
+    sku: "",
+    barcode: "",
+    tag: "",
+    status: "active",
     isPopular: false,
     image: ""
   });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Fetch real categories
   const { data: dbCategories = [] } = useQuery({
@@ -46,32 +52,86 @@ export default function AdminProductEditor() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("File size must be less than 2MB");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Please upload a JPG, PNG, WebP, GIF or SVG image.", variant: "destructive" });
+      return;
     }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max file size is 10MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setFormData(prev => ({ ...prev, image: base64 }));
+      setIsUploadingImage(false);
+      toast({ title: "Image ready", description: "Image loaded successfully. Save the product to confirm." });
+    };
+    reader.onerror = () => {
+      setIsUploadingImage(false);
+      toast({ title: "Failed to read image", variant: "destructive" });
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = '';
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.price) {
-      toast({ title: "Validation Error", description: "Name and Price are required.", variant: "destructive" });
+    // Validation
+    if (!formData.name?.toString().trim()) {
+      toast({ title: "Product name is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.price?.toString().trim() || isNaN(Number(formData.price))) {
+      toast({ title: "Valid price is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.category?.toString().trim()) {
+      toast({ title: "Please select a category", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await createProduct(formData);
-      toast({ title: "Success", description: "Product created successfully!" });
+      const payload = {
+        name: formData.name,
+        description: formData.description || '',
+        price: Number(formData.price),
+        originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
+        category: formData.category,
+        stock: formData.stock ? Number(formData.stock) : 0,
+        sku: (formData as any).sku || undefined,
+        barcode: (formData as any).barcode || undefined,
+        tag: (formData as any).tag || undefined,
+        status: (formData as any).status || 'active',
+        isPopular: (formData as any).isPopular || false,
+        image: formData.image || undefined,
+      };
+
+      await productService.createProduct(payload as any);
+
+      // Real-time: emit event so Products list refreshes instantly
+      import('@/lib/eventBus').then(({ eventBus }) => {
+        eventBus.emit('ENTITY_CREATED', { entity: 'product' });
+      }).catch(() => {});
+
+      toast({ title: "✅ Product saved!", description: `"${formData.name}" has been added to your store.` });
       setLocation("/admin/products");
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to save product", variant: "destructive" });
+      console.error('Save product error:', error);
+      toast({
+        title: "Failed to save product",
+        description: error?.message || "Please check your connection and try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -165,7 +225,7 @@ export default function AdminProductEditor() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">Tag / Badge</label>
-                  <input type="text" placeholder="e.g. Bestseller, New" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <input type="text" name="tag" value={(formData as any).tag} onChange={handleChange} placeholder="e.g. Bestseller, New" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
               </div>
             </div>
@@ -194,11 +254,11 @@ export default function AdminProductEditor() {
             <div className="border-t border-border pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">SKU (Stock Keeping Unit)</label>
-                <input type="text" placeholder="e.g. GRO-RICE-001" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary font-mono uppercase" />
+                <input type="text" name="sku" value={(formData as any).sku} onChange={handleChange} placeholder="e.g. GRO-RICE-001" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary font-mono uppercase" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Barcode (ISBN, UPC, GTIN, etc.)</label>
-                <input type="text" placeholder="0123456789012" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary font-mono" />
+                <input type="text" name="barcode" value={(formData as any).barcode} onChange={handleChange} placeholder="0123456789012" className="w-full h-14 bg-background border border-border rounded-[14px] px-4 text-base placeholder:text-[15px] focus:outline-none focus:border-primary font-mono" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Stock Quantity</label>
@@ -210,15 +270,69 @@ export default function AdminProductEditor() {
           {/* Media & Images */}
           <motion.section id="media" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-background border border-border rounded-[20px] p-6 sm:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
             <h2 className="text-[22px] font-bold text-foreground mb-6">Media</h2>
-            <div 
-              className="border-2 border-dashed border-border hover:border-primary/50 bg-accent/20 rounded-[20px] p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer group relative min-h-[200px]"
-              onClick={() => imageInputRef.current?.click()}
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={imageInputRef}
+              onChange={handleImageChange}
+              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+            />
+
+            {/* Drop Zone */}
+            <div
+              className={`border-2 border-dashed rounded-[20px] transition-all cursor-pointer group relative min-h-[220px] flex flex-col items-center justify-center text-center p-8 ${
+                isUploadingImage
+                  ? 'border-primary/60 bg-primary/5 cursor-wait'
+                  : formData.image
+                  ? 'border-emerald-400/60 bg-emerald-50/30 dark:bg-emerald-900/10'
+                  : 'border-border hover:border-primary/50 bg-accent/20 hover:bg-primary/5'
+              }`}
+              onClick={() => !isUploadingImage && imageInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary', 'bg-primary/5'); }}
+              onDragLeave={(e) => { e.currentTarget.classList.remove('border-primary', 'bg-primary/5'); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+                const file = e.dataTransfer.files?.[0];
+                if (file && imageInputRef.current) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  imageInputRef.current.files = dt.files;
+                  imageInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              }}
             >
-              <input type="file" ref={imageInputRef} onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="hidden" />
-              {formData.image ? (
-                <div className="relative w-full flex justify-center">
-                  <img src={formData.image} alt="Preview" className="h-40 object-contain rounded-lg shadow-sm" />
-                  <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, image: ""})); }} className="absolute -top-3 -right-3 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow-sm"><X size={14}/></button>
+              {isUploadingImage ? (
+                <>
+                  <div className="w-16 h-16 bg-background rounded-full border border-primary/30 flex items-center justify-center mb-4 shadow-md">
+                    <div className="w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <p className="text-base font-semibold text-primary">Loading image...</p>
+                  <p className="text-sm text-muted-foreground mt-1">Please wait</p>
+                </>
+              ) : formData.image ? (
+                <div className="relative w-full flex flex-col items-center gap-4">
+                  <div className="relative inline-block">
+                    <img
+                      src={formData.image}
+                      alt="Product preview"
+                      className="h-44 max-w-full object-contain rounded-xl shadow-md border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setFormData(prev => ({ ...prev, image: '' })); if(imageInputRef.current) imageInputRef.current.value=''; }}
+                      className="absolute -top-3 -right-3 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow-lg hover:scale-110 transition-transform"
+                      title="Remove image"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                    Image ready — click to change
+                  </p>
                 </div>
               ) : (
                 <>
@@ -226,7 +340,8 @@ export default function AdminProductEditor() {
                     <UploadCloud size={28} className="text-primary" />
                   </div>
                   <h3 className="text-base font-bold text-foreground mb-1">Click to upload or drag and drop</h3>
-                  <p className="text-sm text-muted-foreground max-w-sm">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+                  <p className="text-sm text-muted-foreground max-w-xs">SVG, PNG, JPG, WebP or GIF · max 10MB</p>
+                  <p className="text-xs text-muted-foreground/60 mt-2">Recommended: 800×400px or square</p>
                 </>
               )}
             </div>
@@ -260,14 +375,14 @@ export default function AdminProductEditor() {
             <h3 className="text-[22px] font-bold text-foreground mb-6">Visibility</h3>
             <div className="space-y-4">
               <label className="flex items-start gap-3 cursor-pointer">
-                <input type="radio" name="status" defaultChecked className="mt-1 w-5 h-5 text-primary bg-background border-border focus:ring-primary" />
+                <input type="radio" name="status" value="active" checked={(formData as any).status === 'active'} onChange={handleChange} className="mt-1 w-5 h-5 text-primary bg-background border-border focus:ring-primary" />
                 <div>
                   <p className="text-sm font-semibold text-foreground">Published</p>
                   <p className="text-[14px] text-muted-foreground mt-1">Product is visible on the store.</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 cursor-pointer">
-                <input type="radio" name="status" className="mt-1 w-5 h-5 text-primary bg-background border-border focus:ring-primary" />
+                <input type="radio" name="status" value="hidden" checked={(formData as any).status === 'hidden'} onChange={handleChange} className="mt-1 w-5 h-5 text-primary bg-background border-border focus:ring-primary" />
                 <div>
                   <p className="text-sm font-semibold text-foreground">Hidden</p>
                   <p className="text-[14px] text-muted-foreground mt-1">Product is hidden from customers.</p>

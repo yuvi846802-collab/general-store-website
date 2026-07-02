@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { createProduct, getProducts, updateProduct, deleteProduct } from '../controllers/product.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { createProduct, getProducts, updateProduct, deleteProduct, exportProducts } from '../controllers/product.controller';
+import { requireAuth, requireAdmin } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.post('/', authenticate, createProduct);
+router.get('/export', requireAuth, requireAdmin, exportProducts);
+router.post('/', requireAuth, requireAdmin, createProduct);
 router.get('/', getProducts); // Public GET for storefront
-router.put('/:id', authenticate, updateProduct);
-router.delete('/:id', authenticate, deleteProduct);
+router.put('/:id', requireAuth, requireAdmin, updateProduct);
+router.delete('/:id', requireAuth, requireAdmin, deleteProduct);
 
 export default router;
