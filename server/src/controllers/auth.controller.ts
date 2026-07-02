@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prismaClient';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { signToken } from '../utils/token';
@@ -7,8 +7,6 @@ import { AppError } from '../utils/appError';
 import { catchAsync } from '../utils/catchAsync';
 import { sendEmail } from '../utils/email';
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator';
-
-const prisma = new PrismaClient();
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
 
 const setTokenCookies = (res: Response, refreshToken: string) => {
@@ -52,14 +50,14 @@ export const register = catchAsync(async (req: Request, res: Response, next: Nex
     }
   });
 
-  // Send verification email
-  const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email?token=${verificationToken}&email=${email}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const verifyUrl = `${frontendUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
   
   try {
     await sendEmail({
       email: user.email,
       subject: 'Welcome to Hakeem Store - Verify your email',
-      message: `Please verify your email by making a POST request to: \n\n${verifyUrl}`
+      message: `Please verify your email by clicking the following link: \n\n${verifyUrl}`
     });
   } catch (err) {
     console.error('Email error:', err);
@@ -80,37 +78,12 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 
   let user = await prisma.user.findUnique({ where: { email } });
   
-  // Auto-Register if user doesn't exist
-  if (!user) {
-    const hashedPassword = await bcrypt.hash(password, 12);
-    user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        isVerified: true, // Auto verify so they can buy products immediately
-        role: 'USER',
-      }
-    });
-    
-    // Optional: Send Welcome Email in background
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Welcome to Hakeem Store!',
-        message: 'Your account has been created automatically. Happy Shopping!'
-      });
-    } catch (e) {
-      console.log('Welcome email failed', e);
-    }
-  } else {
-    // If user exists, check password and verification
-    if (!(await bcrypt.compare(password, user.password))) {
-      return next(new AppError('Invalid email or password', 401));
-    }
-    
-    if (!user.isVerified) {
-      return next(new AppError('Please verify your email first', 401));
-    }
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return next(new AppError('Invalid email or password', 401));
+  }
+  
+  if (!user.isVerified) {
+    return next(new AppError('Please verify your email first', 401));
   }
 
   // Generate tokens
@@ -238,13 +211,14 @@ export const resendVerification = catchAsync(async (req: Request, res: Response,
     }
   });
 
-  const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email?token=${verificationToken}&email=${email}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const verifyUrl = `${frontendUrl}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
   
   try {
     await sendEmail({
       email: user.email,
       subject: 'Hakeem Store - Verify your email',
-      message: `Please verify your email by making a POST request to: \n\n${verifyUrl}`
+      message: `Please verify your email by clicking the following link: \n\n${verifyUrl}`
     });
   } catch (err) {
     console.error(err);
@@ -271,7 +245,8 @@ export const forgotPassword = catchAsync(async (req: Request, res: Response, nex
     }
   });
 
-  const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
   try {
     await sendEmail({

@@ -1,7 +1,21 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prismaClient';
+import { z } from 'zod';
 
-const prisma = new PrismaClient();
+const productUpdateSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  price: z.union([z.number(), z.string()]).transform(v => parseFloat(String(v))).optional(),
+  originalPrice: z.union([z.number(), z.string()]).transform(v => parseFloat(String(v))).nullable().optional(),
+  stock: z.union([z.number(), z.string()]).transform(v => parseInt(String(v), 10)).optional(),
+  isPopular: z.boolean().optional(),
+  image: z.string().optional(),
+  sku: z.string().nullable().optional(),
+  barcode: z.string().nullable().optional(),
+  tag: z.string().nullable().optional(),
+  status: z.string().optional(),
+  category: z.string().optional(),
+});
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
@@ -56,7 +70,7 @@ export const createProduct = async (req: Request, res: Response) => {
     res.status(201).json(newProduct);
   } catch (error: any) {
     console.error('Create product error:', error);
-    res.status(500).json({ error: 'Failed to create product', details: error.message });
+    res.status(500).json({ error: 'Failed to create product' });
   }
 };
 
@@ -96,9 +110,13 @@ export const getProducts = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const parsed = productUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.errors[0]?.message || 'Invalid product data' });
+    }
 
-    // Optional: handle category string to ID conversion if updating category
+    const updates: any = { ...parsed.data };
+
     if (updates.category) {
       let categoryRecord = await prisma.category.findFirst({
         where: { name: updates.category }
@@ -116,10 +134,6 @@ export const updateProduct = async (req: Request, res: Response) => {
       updates.categoryId = categoryRecord.id;
       delete updates.category;
     }
-
-    if (updates.price) updates.price = parseFloat(updates.price);
-    if (updates.originalPrice) updates.originalPrice = parseFloat(updates.originalPrice);
-    if (updates.stock) updates.stock = parseInt(updates.stock);
 
     const updatedProduct = await prisma.product.update({
       where: { id },

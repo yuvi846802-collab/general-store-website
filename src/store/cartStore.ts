@@ -1,16 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product } from '@/types'; // assuming Product is in types, I will check later
+import { Product } from '@/types';
 
 export interface CartItem {
-  product: any; // Using any for now to avoid strict type errors before checking the exact type
+  product: Product;
   quantity: number;
 }
 
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (product: any) => void;
+  addItem: (product: Product) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;

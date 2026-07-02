@@ -11,6 +11,8 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/Home"));
 const Page = lazy(() => import("@/pages/Page"));
 const UserProfile = lazy(() => import("@/pages/user/Profile"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
+const OrderSuccess = lazy(() => import("@/pages/OrderSuccess"));
 
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -49,6 +51,8 @@ function Router() {
       <Switch>
         {/* Public Routes */}
         <Route path="/" component={Home} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/order-success/:id" component={OrderSuccess} />
         <Route path="/about" component={Page} />
         <Route path="/faqs" component={Page} />
         <Route path="/help" component={Page} />

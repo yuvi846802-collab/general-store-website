@@ -58,6 +58,7 @@ import settingsRoutes from './routes/settings.routes';
 import heroRoutes from './routes/hero.routes';
 import userRoutes from './routes/user.routes';
 import uploadRoutes from './routes/upload.routes';
+import orderRoutes from './routes/order.routes';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -67,6 +68,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/hero', heroRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

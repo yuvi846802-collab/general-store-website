@@ -8,9 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 export function getImageUrl(path: string | undefined | null) {
   if (!path) return "";
   if (path.startsWith("http") || path.startsWith("data:")) return path;
-  // Resolve backend-served uploads to the API server
   if (path.startsWith("/uploads/")) {
-    return `http://localhost:5000${path}`;
+    const apiHost = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+    return `${apiHost}${path}`;
   }
   if (path.startsWith("/")) {
     return import.meta.env.BASE_URL + path.slice(1);

@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prismaClient';
 import bcrypt from 'bcryptjs';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
-
-const prisma = new PrismaClient();
 
 export const updateProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { firstName, lastName, phone } = req.body;
@@ -75,7 +73,17 @@ export const revokeAllSessions = catchAsync(async (req: Request, res: Response, 
 
 export const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const users = await prisma.user.findMany({
-    select: { id: true, name: true, email: true, phone: true, role: true, isVerified: true, createdAt: true }
+    select: { 
+      id: true, 
+      name: true, 
+      email: true, 
+      phone: true, 
+      role: true, 
+      isVerified: true, 
+      createdAt: true,
+      _count: { select: { orders: true } }
+    },
+    orderBy: { createdAt: 'desc' }
   });
   res.status(200).json({ status: 'success', users });
 });

@@ -6,7 +6,7 @@ export const getAuthHeaders = () => {
   };
 };
 
-export const API_URL = 'http://localhost:5000/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Helper for fetch with credentials
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
@@ -317,6 +317,8 @@ export const fetchPublicProducts = async (): Promise<any[]> => {
     return [];
   }
 };
+
+export const fetchProducts = fetchPublicProducts;
 
 export const fetchPublicCategories = async (): Promise<any[]> => {
   try {

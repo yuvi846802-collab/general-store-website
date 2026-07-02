@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/token';
 import { AppError } from '../utils/appError';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../utils/prismaClient';
 
 // Extend Express Request object to include user
 declare global {
