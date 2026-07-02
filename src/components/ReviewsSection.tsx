@@ -235,52 +235,52 @@ export default function ReviewsSection() {
                 <ChevronRight size={22} />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-[#0c1520] border-[#1e293b] p-0 overflow-hidden [&>button]:hidden shadow-2xl">
+            <DialogContent className="sm:max-w-[500px] bg-background border-border p-0 overflow-hidden [&>button]:hidden shadow-2xl">
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-full bg-[#102a2c] flex items-center justify-center shrink-0 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] relative">
-                       <MessageSquare className="text-white w-6 h-6" />
-                       <Star className="text-white w-3 h-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[2px]" fill="white" />
+                    <div className="w-14 h-14 rounded-full bg-secondary/50 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_15px_rgba(20,184,166,0.15)] relative">
+                       <MessageSquare className="text-primary w-6 h-6" />
+                       <Star className="text-primary w-3 h-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[2px]" fill="currentColor" />
                     </div>
                     <div>
-                      <DialogTitle className="text-xl font-bold text-white mb-1">Share Your Experience</DialogTitle>
-                      <DialogDescription className="text-slate-400 text-sm">
+                      <DialogTitle className="text-xl font-bold text-foreground mb-1">Share Your Experience</DialogTitle>
+                      <DialogDescription className="text-muted-foreground text-sm">
                         We'd love to hear about your experience<br/>with Hakeem Store.
                       </DialogDescription>
                     </div>
                   </div>
-                  <DialogClose className="w-8 h-8 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                  <DialogClose className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                     <X size={16} />
                   </DialogClose>
                 </div>
                 
-                <div className="w-full h-px bg-slate-800 mb-6"></div>
+                <div className="w-full h-px bg-border mb-6"></div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                   
                   {/* Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="flex items-center gap-2 text-emerald-400 font-medium text-sm">
+                    <Label htmlFor="name" className="flex items-center gap-2 text-primary font-medium text-sm">
                       <User size={16} /> Your Name
                     </Label>
                     <div className="relative">
-                      <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                       <Input 
                         id="name" 
                         placeholder="Enter your name" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="bg-[#0f1926] border-emerald-500/50 text-white pl-10 h-12 focus-visible:ring-emerald-500"
+                        className="bg-background border-input text-foreground pl-10 h-12 focus-visible:ring-primary"
                       />
                     </div>
                   </div>
 
                   {/* Rating */}
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-emerald-400 font-medium text-sm">
+                    <Label className="flex items-center gap-2 text-primary font-medium text-sm">
                       <Star size={16} className="fill-transparent" /> Your Rating
                     </Label>
                     <div className="flex gap-2">
@@ -293,19 +293,19 @@ export default function ReviewsSection() {
                         >
                           <Star 
                             size={32} 
-                            className={star <= rating && rating > 0 ? "fill-[#f59e0b] text-[#f59e0b]" : "fill-slate-800 text-slate-800"} 
+                            className={star <= rating && rating > 0 ? "fill-[#f59e0b] text-[#f59e0b]" : "fill-muted text-muted-foreground/30"} 
                           />
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-slate-500">Tap to rate your experience</p>
+                    <p className="text-xs text-muted-foreground">Tap to rate your experience</p>
                   </div>
 
                   {/* Review */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="review" className="flex items-center gap-2 text-emerald-400 font-medium text-sm">
-                        <Pencil size={16} /> Your Review <span className="text-slate-500 font-normal text-xs ml-1">(Optional)</span>
+                      <Label htmlFor="review" className="flex items-center gap-2 text-primary font-medium text-sm">
+                        <Pencil size={16} /> Your Review <span className="text-muted-foreground font-normal text-xs ml-1">(Optional)</span>
                       </Label>
                     </div>
                     <Textarea 
@@ -315,36 +315,36 @@ export default function ReviewsSection() {
                       value={review}
                       maxLength={500}
                       onChange={(e) => setReview(e.target.value)}
-                      className="bg-[#0f1926] border-slate-800 text-white resize-none focus-visible:ring-emerald-500 p-4"
+                      className="bg-background border-input text-foreground resize-none focus-visible:ring-primary p-4"
                     />
-                    <div className="flex justify-end text-xs text-slate-500 mt-1">
+                    <div className="flex justify-end text-xs text-muted-foreground mt-1">
                       {review.length} / 500
                     </div>
                   </div>
 
-                  <div className="w-full h-px bg-slate-800 my-1"></div>
+                  <div className="w-full h-px bg-border my-1"></div>
 
                   {/* Badges */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck size={20} className="text-emerald-500" />
+                      <ShieldCheck size={20} className="text-primary" />
                       <div>
-                        <p className="text-[10px] font-bold text-white leading-tight">Secure & Private</p>
-                        <p className="text-[9px] text-slate-400 leading-tight">Your data is safe with us</p>
+                        <p className="text-[10px] font-bold text-foreground leading-tight">Secure & Private</p>
+                        <p className="text-[9px] text-muted-foreground leading-tight">Your data is safe with us</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Heart size={20} className="text-purple-500" />
                       <div>
-                        <p className="text-[10px] font-bold text-white leading-tight">Helps Us Improve</p>
-                        <p className="text-[9px] text-slate-400 leading-tight">Your feedback matters</p>
+                        <p className="text-[10px] font-bold text-foreground leading-tight">Helps Us Improve</p>
+                        <p className="text-[9px] text-muted-foreground leading-tight">Your feedback matters</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Award size={20} className="text-blue-500" />
                       <div>
-                        <p className="text-[10px] font-bold text-white leading-tight">Better Experience</p>
-                        <p className="text-[9px] text-slate-400 leading-tight">For you and everyone</p>
+                        <p className="text-[10px] font-bold text-foreground leading-tight">Better Experience</p>
+                        <p className="text-[9px] text-muted-foreground leading-tight">For you and everyone</p>
                       </div>
                     </div>
                   </div>
@@ -361,31 +361,31 @@ export default function ReviewsSection() {
 
           {/* Error Dialog */}
           <Dialog open={errorOpen} onOpenChange={setErrorOpen}>
-            <DialogContent className="sm:max-w-[425px] bg-[#111116] border-[#222228] p-0 overflow-hidden [&>button]:hidden shadow-[0_0_50px_rgba(220,38,38,0.1)] rounded-2xl">
+            <DialogContent className="sm:max-w-[425px] bg-background border-border p-0 overflow-hidden [&>button]:hidden shadow-2xl rounded-2xl">
               <div className="p-8 flex flex-col items-center text-center">
-                <DialogClose className="absolute right-5 top-5 text-slate-500 hover:text-white transition-colors">
+                <DialogClose className="absolute right-5 top-5 text-muted-foreground hover:text-foreground transition-colors">
                   <X size={20} />
                 </DialogClose>
                 
                 <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl"></div>
-                  <div className="relative z-10 w-16 h-16 bg-[#1a1012] border-2 border-red-500/30 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)]">
-                    <div className="absolute w-12 h-12 bg-red-500/10 rounded-xl blur-sm"></div>
-                    <X className="text-red-500 w-8 h-8 relative z-20" strokeWidth={3} />
+                  <div className="absolute inset-0 bg-destructive/20 rounded-full blur-xl"></div>
+                  <div className="relative z-10 w-16 h-16 bg-background border-2 border-destructive/30 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                    <div className="absolute w-12 h-12 bg-destructive/10 rounded-xl blur-sm"></div>
+                    <X className="text-destructive w-8 h-8 relative z-20" strokeWidth={3} />
                   </div>
                 </div>
 
-                <DialogTitle className="text-3xl font-bold text-white mb-2">Error</DialogTitle>
-                <div className="w-10 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent mb-6"></div>
-                <DialogDescription className="text-slate-300 text-base font-medium mb-8">
+                <DialogTitle className="text-3xl font-bold text-foreground mb-2">Error</DialogTitle>
+                <div className="w-10 h-1 bg-gradient-to-r from-transparent via-destructive to-transparent mb-6"></div>
+                <DialogDescription className="text-foreground/90 text-base font-medium mb-8">
                   {errorData.subtitle}
                 </DialogDescription>
 
-                <div className="w-full bg-[#1c1314] border border-red-900/50 rounded-xl p-4 flex gap-3 text-left mb-8 shadow-inner">
-                  <Info className="text-red-400 shrink-0 mt-0.5" size={20} />
+                <div className="w-full bg-destructive/5 border border-destructive/20 rounded-xl p-4 flex gap-3 text-left mb-8 shadow-inner">
+                  <Info className="text-destructive shrink-0 mt-0.5" size={20} />
                   <div>
-                    <h4 className="text-white font-bold text-sm mb-1">How to fix this?</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">
+                    <h4 className="text-foreground font-bold text-sm mb-1">How to fix this?</h4>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
                       {errorData.fixDescription}
                     </p>
                   </div>

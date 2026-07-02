@@ -1,0 +1,180 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+const productsData: Record<string, { name: string, price: string, image: string, tag?: string }[]> = {
+  "Grocery Items": [
+    { name: "Premium Basmati Rice (5kg)", price: "₹450", image: "/assets/products/basmati_rice.png", tag: "PREMIUM QUALITY" },
+    { name: "Whole Wheat Atta (10kg)", price: "₹380", image: "/assets/products/wheat_atta.png", tag: "FRESH & NATURAL" },
+    { name: "Toor Dal (1kg)", price: "₹160", image: "/assets/products/toor_dal.png", tag: "HIGH PROTEIN" },
+    { name: "Refined Sunflower Oil (1L)", price: "₹140", image: "/assets/products/sunflower_oil.png", tag: "100% PURE" },
+    { name: "Pure Desi Ghee (500ml)", price: "₹320", image: "/assets/products/desi_ghee.png", tag: "PURE & HEALTHY" },
+    { name: "Crystal Sugar (1kg)", price: "₹45", image: "/assets/products/crystal_sugar.png", tag: "PREMIUM SWEET" },
+    { name: "Himalayan Pink Salt (1kg)", price: "₹120", image: "/assets/products/pink_salt.png", tag: "100% NATURAL" },
+    { name: "Organic Turmeric Powder (500g)", price: "₹150", image: "/assets/products/turmeric.png", tag: "ORGANIC SPICE" },
+    { name: "Green Cardamom (250g)", price: "₹450", image: "/assets/products/cardamom.png", tag: "PREMIUM SPICE" },
+    { name: "Black Peppercorns (200g)", price: "₹180", image: "/assets/products/black_pepper.png", tag: "FRESH SPICE" },
+    { name: "Rajma/Kidney Beans (1kg)", price: "₹140", image: "/assets/products/rajma.png", tag: "HIGH PROTEIN" },
+    { name: "Organic Jaggery (1kg)", price: "₹85", image: "/assets/products/jaggery.png", tag: "NATURAL SWEETENER" },
+  ],
+  "Beverages": [
+    { name: "Coca Cola (2L)", price: "₹95", image: "/assets/products/coca_cola.png", tag: "CHILLED" },
+    { name: "Orange Juice (1L)", price: "₹120", image: "/assets/products/orange_juice.png", tag: "100% REAL JUICE" },
+    { name: "Mineral Water (1L)", price: "₹20", image: "/assets/products/mineral_water.png", tag: "PURE WATER" },
+    { name: "Cold Coffee (250ml)", price: "₹85", image: "/assets/products/cold_coffee.png", tag: "REFRESHING" },
+    { name: "Green Tea Bags (25pcs)", price: "₹150", image: "/assets/products/green_tea.png", tag: "HEALTHY" },
+    { name: "Mango Shake (200ml)", price: "₹60", image: "/assets/products/mango_shake.png", tag: "SUMMER SPECIAL" },
+    { name: "Red Bull Energy Drink (250ml)", price: "₹110", image: "/assets/products/red_bull.png", tag: "ENERGY BOOST" },
+    { name: "Sprite (1.5L)", price: "₹85", image: "/assets/products/sprite.png", tag: "CHILLED" },
+    { name: "Lipton Ice Tea (500ml)", price: "₹50", image: "/assets/products/lipton.png", tag: "COOL & FRESH" },
+    { name: "Premium Apple Juice (1L)", price: "₹140", image: "/assets/products/apple_juice.png", tag: "NO ADDED SUGAR" },
+    { name: "Maaza Mango Drink (1.2L)", price: "₹75", image: "/assets/products/maaza.png", tag: "SWEET & THICK" },
+    { name: "Nescafe Classic Coffee (50g)", price: "₹160", image: "/assets/products/nescafe.png", tag: "PURE COFFEE" },
+  ],
+  "Snacks": [
+    { name: "Lays Classic Salted (50g)", price: "₹20", image: "/assets/products/lay's.png", tag: "CRISPY" },
+    { name: "Kurkure Masala Munch (100g)", price: "₹40", image: "/assets/products/kurkure.png", tag: "SPICY" },
+    { name: "Oreo Chocolate Cookies (120g)", price: "₹35", image: "/assets/products/oreo.png", tag: "SWEET TREAT" },
+    { name: "Doritos Nacho Cheese (150g)", price: "₹85", image: "/assets/products/doritos.png", tag: "PARTY SNACK" },
+    { name: "Haldiram's Bhujia (200g)", price: "₹50", image: "/assets/products/bhujia.png", tag: "TRADITIONAL" },
+    { name: "Britannia Good Day (250g)", price: "₹45", image: "/assets/products/good_day.png", tag: "TEA TIME" },
+    { name: "Pringles Sour Cream (107g)", price: "₹110", image: "/assets/products/pringles.png", tag: "PREMIUM SNACK" },
+    { name: "Cadbury Dairy Milk (100g)", price: "₹80", image: "/assets/products/dairy_milk.png", tag: "RICH CHOCOLATE" },
+    { name: "Mixed Dry Fruits (200g)", price: "₹250", image: "/assets/products/dry_fruits.png", tag: "HEALTHY SNACK" },
+    { name: "Roasted Almonds (150g)", price: "₹199", image: "/assets/products/almonds.png", tag: "HIGH PROTEIN" },
+    { name: "Bingo Mad Angles (90g)", price: "₹40", image: "/assets/products/bingo.png", tag: "TANGY TASTE" },
+    { name: "Maggi 2-Minute Noodles (4 Pack)", price: "₹56", image: "/assets/products/maggi.png", tag: "FAST SNACK" },
+  ],
+  "Household Essentials": [
+    { name: "Surf Excel Matic (1kg)", price: "₹220", image: "/assets/products/surf_excel.png", tag: "STAIN REMOVAL" },
+    { name: "Vim Dishwash Gel (500ml)", price: "₹115", image: "/assets/products/vim_gel.png", tag: "TOUGH ON GREASE" },
+    { name: "Comfort Fabric Cond. (860ml)", price: "₹210", image: "/assets/products/comfort.png", tag: "FRESH FRAGRANCE" },
+    { name: "Godrej Aer Pocket (10g)", price: "₹55", image: "/assets/products/godrej_aer.png", tag: "LONG LASTING" },
+    { name: "Mortein Mosquito Repellent (45ml)", price: "₹85", image: "/assets/products/mortein.png", tag: "100% PROTECTION" },
+    { name: "Premium Toilet Paper (4 Rolls)", price: "₹150", image: "/assets/products/toilet_paper.png", tag: "ULTRA SOFT" },
+    { name: "Garbage Bags (30 pcs)", price: "₹99", image: "/assets/products/garbage_bags.png", tag: "HEAVY DUTY" },
+    { name: "Floor Cleaner Liquid (1L)", price: "₹120", image: "/assets/products/lizol.png", tag: "GERM KILLER" },
+    { name: "Glass Cleaner Spray (500ml)", price: "₹90", image: "/assets/products/colin.png", tag: "STREAK FREE" },
+    { name: "Cotton Mop with Stick", price: "₹250", image: "/assets/products/mop.png", tag: "DURABLE" },
+    { name: "Dettol Liquid Handwash (200ml)", price: "₹99", image: "/assets/products/dettol.png", tag: "GERM PROTECTION" },
+    { name: "Odonil Room Freshener (50g)", price: "₹45", image: "/assets/products/odonil.png", tag: "FRESH AIR" },
+  ],
+  "Personal Care": [
+    { name: "Dove Body Wash (250ml)", price: "₹199", image: "/assets/products/dove.png", tag: "DEEP MOISTURE" },
+    { name: "Nivea Men Deodorant (150ml)", price: "₹190", image: "/assets/products/nivea.png", tag: "48H FRESHNESS" },
+    { name: "Head & Shoulders Shampoo (340ml)", price: "₹280", image: "/assets/products/head_shoulders.png", tag: "ANTI DANDRUFF" },
+    { name: "Sensodyne Toothpaste (100g)", price: "₹120", image: "/assets/products/sensodyne.png", tag: "SENSITIVITY RELIEF" },
+    { name: "Parachute Coconut Oil (250ml)", price: "₹105", image: "/assets/products/parachute.png", tag: "100% PURE" },
+    { name: "Gillette Mach 3 Razor", price: "₹220", image: "/assets/products/gillette.png", tag: "SMOOTH SHAVE" },
+    { name: "Ponds Face Wash (100g)", price: "₹140", image: "/assets/products/ponds.png", tag: "GLOWING SKIN" },
+    { name: "Himalaya Neem Scrub (100g)", price: "₹130", image: "/assets/products/himalaya.png", tag: "HERBAL" },
+    { name: "Listerine Mouthwash (250ml)", price: "₹110", image: "/assets/products/listerine.png", tag: "FRESH BREATH" },
+    { name: "Olay Moisturizing Cream (50g)", price: "₹299", image: "/assets/products/olay.png", tag: "ANTI AGING" },
+    { name: "Colgate MaxFresh (150g)", price: "₹115", image: "/assets/products/colgate.png", tag: "COOLING CRYSTALS" },
+    { name: "Vaseline Body Lotion (400ml)", price: "₹350", image: "/assets/products/vaseline.png", tag: "DEEP RESTORE" },
+  ],
+  "Daily Needs": [
+    { name: "Fresh Milk (1L)", price: "₹65", image: "/assets/products/fresh_milk.png", tag: "FARM FRESH" },
+    { name: "White Bread (400g)", price: "₹40", image: "/assets/products/white_bread.png", tag: "BAKERY FRESH" },
+    { name: "Farm Fresh Eggs (12 pcs)", price: "₹85", image: "/assets/products/eggs.png", tag: "HIGH PROTEIN" },
+    { name: "Amul Butter (100g)", price: "₹54", image: "/assets/products/amul_butter.png", tag: "RICH TASTE" },
+    { name: "Paneer (200g)", price: "₹90", image: "/assets/products/paneer.png", tag: "FRESH DAIRY" },
+    { name: "Curd/Dahi (400g)", price: "₹45", image: "/assets/products/curd.png", tag: "PROBIOTIC" },
+    { name: "Fresh Brown Bread (400g)", price: "₹50", image: "/assets/products/brown_bread.png", tag: "HIGH FIBER" },
+    { name: "Cheese Slices (200g)", price: "₹125", image: "/assets/products/cheese_slices.png", tag: "EXTRA CHEESY" },
+    { name: "Peanut Butter (340g)", price: "₹160", image: "/assets/products/peanut_butter.png", tag: "PROTEIN RICH" },
+    { name: "Mixed Fruit Jam (500g)", price: "₹145", image: "/assets/products/fruit_jam.png", tag: "FRUITY TASTE" },
+    { name: "Britannia Milk Rusk (200g)", price: "₹40", image: "/assets/products/milk_rusk.png", tag: "CHAI TIME" },
+    { name: "Amul Cheese Cubes (200g)", price: "₹130", image: "/assets/products/cheese_cubes.png", tag: "100% VEG" },
+  ],
+  "Cleaning Products": [
+    { name: "Harpic Toilet Cleaner (1L)", price: "₹180", image: "/assets/products/harpic.png", tag: "10X CLEANING" },
+    { name: "Lizol Floor Cleaner (1L)", price: "₹190", image: "/assets/products/lizol_cleaner.png", tag: "99.9% GERM KILL" },
+    { name: "Colin Glass Cleaner (500ml)", price: "₹95", image: "/assets/products/colin_cleaner.png", tag: "SHINE BOOST" },
+    { name: "Scotch Brite Scrub Pad (Set of 3)", price: "₹45", image: "/assets/products/scrub_pad.png", tag: "TOUGH SCRUB" },
+    { name: "Domex Toilet Expert (500ml)", price: "₹105", image: "/assets/products/domex.png", tag: "STAIN REMOVAL" },
+    { name: "Ariel Liquid Detergent (1L)", price: "₹250", image: "/assets/products/ariel.png", tag: "COLOR PROTECT" },
+    { name: "Tide Washing Powder (1kg)", price: "₹110", image: "/assets/products/tide.png", tag: "BRIGHT CLEAN" },
+    { name: "Kitchen Cleaning Towels (Set of 4)", price: "₹150", image: "/assets/products/kitchen_towel.png", tag: "ULTRA ABSORBENT" },
+    { name: "Multipurpose Cleaning Spray (500ml)", price: "₹130", image: "/assets/products/multipurpose.png", tag: "ALL SURFACE" },
+    { name: "Dustpan and Brush Set", price: "₹180", image: "/assets/products/dustpan.png", tag: "EASY CLEAN" },
+    { name: "Odonil Zip Pouch (10g)", price: "₹55", image: "/assets/products/odonil_pouch.png", tag: "BATHROOM FRESH" },
+    { name: "Vim Dishwash Bar (300g)", price: "₹25", image: "/assets/products/vim_bar.png", tag: "TOUGH ON GREASE" },
+  ],
+  "Stationery": [
+    { name: "Classmate Notebook (172 pages)", price: "₹50", image: "/assets/products/classmate.png", tag: "PREMIUM PAPER" },
+    { name: "Cello Gripper Pens (Pack of 5)", price: "₹50", image: "/assets/products/cello.png", tag: "SMOOTH WRITING" },
+    { name: "A4 Printer Paper (500 sheets)", price: "₹250", image: "/assets/products/a4_paper.png", tag: "BRIGHT WHITE" },
+    { name: "Camel Geometry Box", price: "₹120", image: "/assets/products/camel_geometry.png", tag: "STUDENT ESSENTIAL" },
+    { name: "Highlighter Pen Set (4 colors)", price: "₹80", image: "/assets/products/highlighter.png", tag: "BRIGHT COLORS" },
+    { name: "Sticky Notes (400 sheets)", price: "₹99", image: "/assets/products/sticky_notes.png", tag: "OFFICE ESSENTIAL" },
+    { name: "Faber-Castell Pencils (Pack of 10)", price: "₹60", image: "/assets/products/faber_castell.png", tag: "DARK LEAD" },
+    { name: "Office Stapler with Pins", price: "₹150", image: "/assets/products/stapler.png", tag: "HEAVY DUTY" },
+    { name: "Fevicol MR (100g)", price: "₹45", image: "/assets/products/fevicol.png", tag: "STRONG BOND" },
+    { name: "Desktop Calculator", price: "₹350", image: "/assets/products/calculator.png", tag: "12 DIGIT" },
+    { name: "Camlin Water Colors (12 Shades)", price: "₹120", image: "/assets/products/water_colors.png", tag: "ART SUPPLIES" },
+    { name: "Nataraj Erasers (Pack of 20)", price: "₹40", image: "/assets/products/erasers.png", tag: "NON TOXIC" },
+  ]
+};
+
+async function main() {
+  console.log('Seeding Database with Dummy Data...');
+  for (const [categoryName, products] of Object.entries(productsData)) {
+    // Check if category exists or create it
+    const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    let category = await prisma.category.findUnique({
+      where: { slug }
+    });
+
+    if (!category) {
+      category = await prisma.category.create({
+        data: {
+          name: categoryName,
+          slug,
+          description: `All ${categoryName} products`,
+          image: '/assets/categories/default.png'
+        }
+      });
+      console.log(`Created Category: ${categoryName}`);
+    } else {
+      console.log(`Category exists: ${categoryName}`);
+    }
+
+    // Insert Products
+    for (const prod of products) {
+      // Parse price to float
+      const priceNum = parseFloat(prod.price.replace(/[^0-9.]/g, ''));
+      
+      const existingProd = await prisma.product.findFirst({
+        where: { name: prod.name }
+      });
+
+      if (!existingProd) {
+        await prisma.product.create({
+          data: {
+            name: prod.name,
+            description: prod.tag || '',
+            price: priceNum,
+            originalPrice: priceNum + 50,
+            image: prod.image,
+            stock: Math.floor(Math.random() * 100) + 10,
+            isPopular: Math.random() > 0.8,
+            categoryId: category.id
+          }
+        });
+        console.log(`  - Created Product: ${prod.name}`);
+      }
+    }
+  }
+  
+  console.log('Seeding complete! ✨');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

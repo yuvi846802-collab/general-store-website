@@ -1,10 +1,11 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, ShoppingCart, ChevronLeft, ChevronRight, LayoutGrid, LayoutList } from "lucide-react";
-
 import { CategoryCard } from "../features/products/CategoryCard";
-import { categories } from "../constants/data";
-import { productsData } from "../constants/products";
+import { getImageUrl } from "../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPublicProducts, fetchPublicCategories } from "../services/api";
+import { useCartStore } from "@/store/cartStore";
 
 // Use React.memo to prevent unnecessary re-renders
 const MemoizedCategoryCard = React.memo(CategoryCard);
@@ -14,6 +15,7 @@ export default function ProductCategories() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllItems, setShowAllItems] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const addItem = useCartStore((state) => state.addItem);
 
   // Use useCallback to maintain function reference
   const handleCategoryClick = useCallback((categoryName: string) => {
@@ -53,10 +55,41 @@ export default function ProductCategories() {
     }
   };
 
+  // Fetch products from real backend
+  const { data: dbProducts = [] } = useQuery({
+    queryKey: ['public-products'],
+    queryFn: fetchPublicProducts,
+    refetchInterval: 2000 // Real-time updates every 2 seconds
+  });
+
+  // Fetch categories from real backend
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ['public-categories'],
+    queryFn: fetchPublicCategories,
+    refetchInterval: 2000 // Real-time updates every 2 seconds
+  });
+
+  // Group products by category dynamically
+  const groupedProducts = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    dbProducts.forEach((p: any) => {
+      const catName = p.category?.name || "Uncategorized";
+      if (!grouped[catName]) grouped[catName] = [];
+      grouped[catName].push({
+        id: p.id,
+        name: p.name,
+        price: `₹${p.price.toFixed(2)}`,
+        image: p.image,
+        tag: p.isPopular ? "Bestseller" : (p.tag || ""),
+      });
+    });
+    return grouped;
+  }, [dbProducts]);
+
   // Memoize the selected products array
   const currentProducts = useMemo(() => {
-    return selectedCategory ? productsData[selectedCategory] || [] : [];
-  }, [selectedCategory]);
+    return selectedCategory ? groupedProducts[selectedCategory] || [] : [];
+  }, [selectedCategory, groupedProducts]);
 
   return (
     <section id="products" className="py-24 bg-muted/20">
@@ -76,7 +109,7 @@ export default function ProductCategories() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {categories.map((cat, index) => (
+          {dbCategories.map((cat: any, index: number) => (
             <MemoizedCategoryCard 
               key={cat.id} 
               category={cat} 
@@ -98,13 +131,13 @@ export default function ProductCategories() {
               className="overflow-hidden w-full"
               id="product-list"
             >
-              <div className="bg-[#0B0F19] rounded-[32px] border border-white/5 shadow-2xl relative w-full p-6 md:p-10">
+              <div className="bg-card rounded-[32px] border border-border shadow-2xl relative w-full p-6 md:p-10">
                 
                 {/* Top Bar: Close Button */}
                 <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
                   <button 
                     onClick={() => setSelectedCategory(null)}
-                    className="w-10 h-10 rounded-full bg-[#1A1F2C] hover:bg-[#252B3B] flex items-center justify-center text-white/60 transition-colors shadow-lg"
+                    className="w-10 h-10 rounded-full bg-secondary hover:bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-lg"
                     aria-label="Close category view"
                   >
                     <X size={20} />
@@ -114,12 +147,12 @@ export default function ProductCategories() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between mt-14 md:mt-0 md:ml-16 mb-10 gap-5">
                   <div>
-                    <h3 className="text-3xl md:text-[40px] font-bold text-white tracking-tight mb-2 leading-none font-heading">{selectedCategory}</h3>
-                    <p className="text-[#8B95A5] text-[15px]">Showing popular items in this category</p>
+                    <h3 className="text-3xl md:text-[40px] font-bold text-foreground tracking-tight mb-2 leading-none font-heading">{selectedCategory}</h3>
+                    <p className="text-muted-foreground text-[15px]">Showing popular items in this category</p>
                   </div>
                   <button 
                     onClick={() => setShowAllItems(!showAllItems)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-white text-sm font-semibold transition-colors bg-transparent hover:bg-white/5"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-foreground text-sm font-semibold transition-colors bg-transparent hover:bg-accent"
                   >
                     {showAllItems ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
                     {showAllItems ? "View as Carousel" : "View All Items"}
@@ -135,7 +168,7 @@ export default function ProductCategories() {
                       {/* Scroll left */}
                       <button 
                         onClick={() => scroll('left')} 
-                        className="absolute -left-4 md:-left-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-white/70 hover:text-white shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
+                        className="absolute -left-4 md:-left-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-secondary hover:bg-secondary/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
                         aria-label="Scroll left"
                       >
                         <ChevronLeft size={24} />
@@ -144,7 +177,7 @@ export default function ProductCategories() {
                       {/* Scroll right */}
                       <button 
                         onClick={() => scroll('right')} 
-                        className="absolute -right-4 md:-right-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-[#1A1F2C] hover:bg-[#252B3B] rounded-full flex items-center justify-center text-white/70 hover:text-white shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
+                        className="absolute -right-4 md:-right-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 bg-secondary hover:bg-secondary/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground shadow-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 focus:outline-none"
                         aria-label="Scroll right"
                       >
                         <ChevronRight size={24} />
@@ -165,17 +198,17 @@ export default function ProductCategories() {
                   >
                     {currentProducts.map((product, idx) => (
                       <div key={idx} className={showAllItems ? "h-full" : "min-w-[280px] snap-start"}>
-                        <div className="bg-[#131722] rounded-[24px] overflow-hidden border border-white/5 hover:border-white/10 transition-colors h-full flex flex-col group/card relative shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
+                        <div className="bg-card rounded-[24px] overflow-hidden border border-border hover:border-border transition-colors h-full flex flex-col group/card relative shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
                           
                           {/* Heart Icon */}
-                          <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-[#131722]/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-red-500 hover:bg-[#131722] transition-colors">
+                          <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-background/60 backdrop-blur-md border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-background transition-colors">
                             <Heart size={16} strokeWidth={1.5} />
                           </button>
 
                           {/* Image */}
-                          <div className="h-[210px] w-full overflow-hidden bg-[#0A0D14]">
+                          <div className="h-[210px] w-full overflow-hidden bg-muted">
                             <img 
-                              src={product.image} 
+                              src={getImageUrl(product.image)} 
                               alt={product.name}
                               className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110"
                               loading="lazy"
@@ -192,17 +225,17 @@ export default function ProductCategories() {
                               </div>
                             )}
                             
-                            <h4 className="text-white font-bold text-[17px] leading-snug mb-3 flex-1">{product.name}</h4>
+                            <h4 className="text-foreground font-bold text-[17px] leading-snug mb-3 flex-1">{product.name}</h4>
                             
-                            <div className="text-white font-bold text-[22px] mb-4">
+                            <div className="text-foreground font-bold text-[22px] mb-4">
                               {product.price}
                             </div>
 
                             <div className="flex items-center gap-3 mt-1">
-                              <button className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors focus:outline-none">
+                              <button onClick={() => addItem(product)} className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus:outline-none">
                                 <ShoppingCart size={18} />
                               </button>
-                              <button className="flex-1 h-10 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl font-semibold text-[15px] transition-colors focus:outline-none">
+                              <button onClick={() => addItem(product)} className="flex-1 h-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold text-[15px] transition-colors focus:outline-none">
                                 Add
                               </button>
                             </div>
@@ -220,7 +253,7 @@ export default function ProductCategories() {
                     {currentProducts.map((_, i) => (
                       <div 
                         key={i} 
-                        className={`h-2 rounded-full transition-all duration-300 ${i === activeIndex || (activeIndex >= currentProducts.length && i === currentProducts.length - 1) ? 'w-6 bg-[#10b981]' : 'w-2 bg-white/10'}`}
+                        className={`h-2 rounded-full transition-all duration-300 ${i === activeIndex || (activeIndex >= currentProducts.length && i === currentProducts.length - 1) ? 'w-6 bg-primary' : 'w-2 bg-accent/50'}`}
                       />
                     ))}
                   </div>

@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        
+    - name: Install dependencies (Frontend)
+      run: npm install
+      
+    - name: Install dependencies (Backend)
+      run: cd server && npm install
+      
+    - name: Typecheck (Frontend)
+      run: npm run typecheck
+      
+    - name: Typecheck (Backend)
+      run: cd server && npx tsc --noEmit
+      
+    - name: Run Tests
+      run: |
+        # Placeholder for actual test commands (npm run test)
+        echo "Running tests..."
+        
+    - name: Build Frontend
+      run: npm run build
+      
+    - name: Build Backend
+      run: cd server && npm run build

@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "npm install --prefix server && npm run prisma:generate --prefix server",
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
-    "build": "vite build --config vite.config.ts",
+    "dev:server": "npm run dev --prefix server",
+    "dev:all": "npx concurrently \"npm run dev --prefix server\" \"vite --config vite.config.ts --host 0.0.0.0\"",
+    "build": "npm run prisma:generate --prefix server && vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
@@ -45,6 +48,7 @@
     "@tailwindcss/vite": "latest",
     "@tanstack/react-query": "latest",
     "@types/node": "^26.0.1",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "latest",
@@ -73,5 +77,13 @@
     "vite": "latest",
     "wouter": "^3.3.5",
     "zod": "latest"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "papaparse": "^5.5.4",
+    "swiper": "^14.0.1",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.14"
   }
 }
