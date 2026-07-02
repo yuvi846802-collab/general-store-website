@@ -31,7 +31,7 @@ app.use(helmet({
   },
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL : true,
   credentials: true
 }));
 
@@ -71,7 +71,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Hakeem Store API is running' });
 });
 
@@ -83,7 +83,11 @@ app.all('*', (req, res, next) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 
-// Start Server
-app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-});
+// Start Server conditionally (skip in Vercel serverless environment)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+  });
+}
+
+export default app;
