@@ -31,7 +31,7 @@ export default function InstagramSection() {
           </a>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 mb-12 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-12 max-w-7xl mx-auto w-full">
           {instagramPosts.map((post, index) => (
             <motion.div
               key={post.id}

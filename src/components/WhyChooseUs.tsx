@@ -87,7 +87,7 @@ export default function WhyChooseUs() {
         <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-900/20 blur-[120px]"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10 max-w-6xl">
+      <div className="container mx-auto px-4 relative z-10 max-w-7xl">
         <div className="text-center mb-16 flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, y: -10 }}

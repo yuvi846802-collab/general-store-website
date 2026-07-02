@@ -102,9 +102,6 @@ export default function AdminProducts() {
           <p className="text-sm text-muted-foreground">Manage your store's inventory and catalog.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={() => setIsImportOpen(true)} className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-            <Upload size={16} /> Import
-          </button>
           <button onClick={() => setIsExportOpen(true)} className="bg-card border border-border text-foreground hover:bg-accent px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
             <Download size={16} /> Export
           </button>

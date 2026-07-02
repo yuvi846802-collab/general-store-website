@@ -95,17 +95,16 @@ export default function QuickCreateModal({ isOpen, onClose }: QuickCreateModalPr
                 {CREATE_ACTIONS.map((action) => {
                   const Icon = action.icon;
                   return (
-                    <Link href={getActionPath(action.id)} onClick={onClose} key={action.id}>
-                      <motion.a
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="flex flex-col items-center justify-center p-4 gap-3 bg-background border border-border hover:border-primary/50 rounded-xl transition-all shadow-sm hover:shadow-md group text-center cursor-pointer h-full"
+                    <Link href={getActionPath(action.id)} key={action.id}>
+                      <a
+                        onClick={onClose}
+                        className="flex flex-col items-center justify-center p-4 gap-3 bg-background border border-border hover:border-primary/50 rounded-xl transition-all shadow-sm hover:shadow-md group text-center cursor-pointer h-full hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <div className={`p-3 rounded-xl ${action.bg} ${action.color} group-hover:scale-110 transition-transform duration-300`}>
                           <Icon size={24} />
                         </div>
                         <span className="text-sm font-semibold text-foreground">{action.label}</span>
-                      </motion.a>
+                      </a>
                     </Link>
                   );
                 })}

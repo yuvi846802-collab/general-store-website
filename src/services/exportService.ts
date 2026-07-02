@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 
@@ -20,7 +20,7 @@ export const exportService = {
         // Map common internal keys to user-friendly column names
         const keyMap: any = {
           'Product Name': 'name',
-          'SKU': 'sku',
+          'SKU': 'id',
           'Category': 'category',
           'Price': 'price',
           'Inventory': 'stock',
@@ -80,7 +80,7 @@ export const exportService = {
     // Table
     const tableData = data.map(row => columns.map(col => String(row[col])));
     
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 36,
       head: [columns],
       body: tableData,

@@ -37,9 +37,6 @@ export default function ExportProductsModal({ isOpen, onClose, filteredProducts,
     setIsExporting(true);
 
     try {
-      // Simulate large dataset preparation
-      await new Promise(r => setTimeout(r, 800));
-
       const dataToExport = exportScope === 'all' ? allProducts : filteredProducts;
       
       const filename = `products_export_${new Date().toISOString().split('T')[0]}`;

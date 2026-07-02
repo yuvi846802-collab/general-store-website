@@ -70,7 +70,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="flex-1 flex flex-col min-w-0 bg-secondary/30 relative">
           
           {/* Topbar */}
-          <header className={`h-16 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 transition-all duration-300 ${isScrolled ? 'bg-background/80 backdrop-blur-xl border-b border-border shadow-sm' : 'bg-transparent'}`}>
+          <header className={`h-16 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 bg-background border-b border-border transition-all duration-300 ${isScrolled ? 'shadow-sm' : ''}`}>
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -84,15 +84,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             
             <div className="flex items-center gap-2 sm:gap-4">
               
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button 
                 onClick={() => setIsCreateOpen(true)}
-                className="hidden sm:flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow"
+                className="hidden sm:flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow hover:scale-[1.03] active:scale-95"
               >
                 <Plus size={16} />
                 <span>Create</span>
-              </motion.button>
+              </button>
 
               <div className="w-px h-6 bg-border mx-1 hidden sm:block"></div>
 
@@ -139,7 +137,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </header>
 
           {/* Page Content Scroll Area */}
-          <main id="main-scroll-area" className="flex-1 overflow-auto p-4 sm:p-8 relative">
+          <main id="main-scroll-area" className={`flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-8 pb-4 sm:pb-8 relative ${location.includes('/products/new') || (location.startsWith('/admin/products/') && location !== '/admin/products') ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
             <div className="max-w-[1600px] mx-auto w-full">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -156,13 +154,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
 
           {/* Floating Action Button (Mobile) */}
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
+          <button 
             onClick={() => setIsCreateOpen(true)}
-            className="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40"
+            className="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40 hover:scale-[1.05] active:scale-95 transition-transform"
           >
             <Plus size={24} />
-          </motion.button>
+          </button>
         </div>
       </div>
       

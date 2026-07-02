@@ -26,7 +26,7 @@ export default function ContactSection() {
           </motion.p>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-5 gap-8 max-w-7xl mx-auto w-full">
           <div className="lg:col-span-2 space-y-4">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <Card className="hover:border-primary/30 transition-colors">
