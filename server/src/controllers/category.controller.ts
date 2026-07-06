@@ -20,8 +20,7 @@ export const createCategory = async (req: Request, res: Response) => {
         slug,
         description: description || '',
         image: typeof image === 'string' ? image : '', // Simple string for now
-        // status is not in the Prisma schema, but let's assume active if not specified.
-        // Wait, I should just map the required fields.
+        status: status || 'active',
       }
     });
 

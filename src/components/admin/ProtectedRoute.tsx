@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (!isLoading) {
       if (!isAuthenticated) {
         setLocation('/admin/login');
-      } else if (user?.role?.toUpperCase() !== 'ADMIN') {
+      } else if (user?.role?.toUpperCase() !== 'ADMIN' && user?.role?.toUpperCase() !== 'SUPER_ADMIN') {
         setLocation('/');
       }
     }
@@ -28,7 +28,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
+  if (!isAuthenticated || (user?.role?.toUpperCase() !== 'ADMIN' && user?.role?.toUpperCase() !== 'SUPER_ADMIN')) {
     return null;
   }
 

@@ -1,5 +1,5 @@
 import { Store, Phone, MapPin, Mail, Clock, Lock, ArrowRight, ShieldCheck, Truck, Tag, Headset, ChevronRight, MailOpen, LogIn } from "lucide-react";
-import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaWhatsapp, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { Link } from "wouter";
 
@@ -16,16 +16,21 @@ export default function Footer() {
               <MailOpen className="text-[#00d4a1]" size={28} />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-foreground mb-2">Stay Updated with <span className="text-primary">Hakeem Store</span></h3>
-              <p className="text-sm font-medium text-foreground/80 mb-4 max-w-sm">Subscribe to get special offers, new product alerts and exclusive discounts.</p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1 max-w-xs">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input type="email" placeholder="Enter your email" className="w-full bg-background border border-input rounded-lg pl-10 pr-4 py-3 text-base sm:text-sm text-foreground focus:outline-none focus:border-primary" />
-                </div>
-                <button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap flex items-center justify-center gap-2">
-                  Subscribe Now <ArrowRight size={16} />
-                </button>
+              <h3 className="text-xl font-bold text-foreground mb-2">Connect with <span className="text-primary">Hakeem Store</span></h3>
+              <p className="text-sm font-medium text-foreground/80 mb-4 max-w-sm">Follow us on our social media platforms for the latest updates, offers, and exclusive discounts.</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-12 h-12 flex items-center justify-center bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] rounded-full transition-all hover:scale-110 shadow-sm" aria-label="Facebook">
+                  <FaFacebook size={24} />
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-12 h-12 flex items-center justify-center bg-[#E4405F]/10 hover:bg-[#E4405F]/20 text-[#E4405F] rounded-full transition-all hover:scale-110 shadow-sm" aria-label="Instagram">
+                  <FaInstagram size={24} />
+                </a>
+                <a href="https://wa.me/917704849886" target="_blank" rel="noreferrer" className="w-12 h-12 flex items-center justify-center bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] rounded-full transition-all hover:scale-110 shadow-sm" aria-label="WhatsApp">
+                  <FaWhatsapp size={24} />
+                </a>
+                <a href="https://t.me/+917704849886" target="_blank" rel="noreferrer" className="w-12 h-12 flex items-center justify-center bg-[#229ED9]/10 hover:bg-[#229ED9]/20 text-[#229ED9] rounded-full transition-all hover:scale-110 shadow-sm" aria-label="Telegram">
+                  <FaTelegram size={24} />
+                </a>
               </div>
             </div>
           </div>
@@ -84,12 +89,6 @@ export default function Footer() {
             <p className="text-sm font-medium text-foreground/80 leading-relaxed mb-8 max-w-sm">
               Your trusted neighborhood general store in Naryawal, providing quality products and excellent service to our community for years.
             </p>
-            <div className="flex gap-3">
-              <a href="#" className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"><FaFacebook size={18} /></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"><FaInstagram size={18} /></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"><FaWhatsapp size={18} /></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all"><FaXTwitter size={18} /></a>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -98,7 +97,6 @@ export default function Footer() {
             <ul className="space-y-4">
               <li><Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center gap-2 group"><ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" /> Home</Link></li>
               <li><Link href="/categories" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center gap-2 group"><ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" /> Categories</Link></li>
-              <li><Link href="/offers" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center gap-2 group"><ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" /> Offers</Link></li>
               <li><Link href="/about" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center gap-2 group"><ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" /> About Us</Link></li>
               <li><Link href="/contact" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center gap-2 group"><ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" /> Contact Us</Link></li>
             </ul>
@@ -134,11 +132,11 @@ export default function Footer() {
             <ul className="space-y-5">
               <li className="flex items-start gap-3">
                 <MapPin className="text-primary mt-0.5 shrink-0" size={16} />
-                <span className="text-sm font-medium text-foreground/80 leading-relaxed">Naryawal, Pakistan</span>
+                <span className="text-sm font-medium text-foreground/80 leading-relaxed">Naryawal, Bareilly, India</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="text-primary shrink-0" size={16} />
-                <span className="text-sm font-medium text-foreground/80">+92 300 1234567</span>
+                <span className="text-sm font-medium text-foreground/80">+91 7704849886</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="text-primary shrink-0" size={16} />

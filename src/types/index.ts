@@ -1,8 +1,20 @@
 export interface User {
   id: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  phone?: string;
+  role: string;
+  avatar?: string;
+  profileImage?: string;
+  isVerified?: boolean;
+  bio?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  timezone?: string;
+  language?: string;
   createdAt: Date;
 }
 

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchPublicCategories, ProductFormData } from "@/services/api";
 import { productService } from "@/services/productService";
 import { useToast } from "@/hooks/use-toast";
+import { eventBus } from "@/lib/eventBus";
 
 export default function AdminProductEditor() {
   const [, setLocation] = useLocation();
@@ -119,9 +120,7 @@ export default function AdminProductEditor() {
       await productService.createProduct(payload as any);
 
       // Real-time: emit event so Products list refreshes instantly
-      import('@/lib/eventBus').then(({ eventBus }) => {
-        eventBus.emit('ENTITY_CREATED', { entity: 'product' });
-      }).catch(() => {});
+      eventBus.emit('ENTITY_CREATED', { entity: 'product' });
 
       toast({ title: "✅ Product saved!", description: `"${formData.name}" has been added to your store.` });
       setLocation("/admin/products");

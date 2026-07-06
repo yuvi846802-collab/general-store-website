@@ -32,10 +32,11 @@ export default function AdminSettings() {
     }
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
@@ -183,13 +184,126 @@ export default function AdminSettings() {
             </motion.div>
           )}
 
-          {activeTab !== "general" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border border-border rounded-2xl p-12 shadow-sm text-center">
-              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                <Store className="text-muted-foreground w-8 h-8" />
+          {activeTab === "seo" && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-foreground mb-6">SEO & Web Settings</h2>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">SEO Meta Title</label>
+                    <input type="text" name="seoTitle" value={formData.seoTitle || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">SEO Meta Description</label>
+                    <textarea name="seoDescription" value={formData.seoDescription || ""} onChange={handleChange} rows={3} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">SEO Keywords (comma separated)</label>
+                    <input type="text" name="seoKeywords" value={formData.seoKeywords || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  </div>
+                </div>
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">{tabs.find(t => t.id === activeTab)?.label} Settings</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">This section is part of the enterprise upgrade and is currently being configured.</p>
+            </motion.div>
+          )}
+
+          {activeTab === "theme" && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-foreground mb-6">Theme & Branding</h2>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Primary Color (Hex)</label>
+                      <div className="flex gap-3">
+                        <input type="color" name="primaryColor" value={formData.primaryColor || "#14b8a6"} onChange={handleChange} className="w-12 h-11 p-1 bg-background border border-border rounded-xl cursor-pointer" />
+                        <input type="text" name="primaryColor" value={formData.primaryColor || "#14b8a6"} onChange={handleChange} className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Font Family</label>
+                      <select name="fontFamily" value={formData.fontFamily || "Inter"} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                        <option value="Inter">Inter</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Outfit">Outfit</option>
+                        <option value="Poppins">Poppins</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl cursor-pointer">
+                      <input type="checkbox" name="darkModeDefault" checked={!!formData.darkModeDefault} onChange={handleChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                      <div>
+                        <div className="font-semibold text-foreground">Enable Dark Mode by Default</div>
+                        <div className="text-sm text-muted-foreground">New visitors will see the dark theme initially.</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "notifications" && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-foreground mb-6">Notification Preferences</h2>
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl cursor-pointer">
+                    <input type="checkbox" name="emailAlerts" checked={!!formData.emailAlerts} onChange={handleChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                    <div>
+                      <div className="font-semibold text-foreground">Email Alerts</div>
+                      <div className="text-sm text-muted-foreground">Receive daily summaries and critical alerts via email.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl cursor-pointer">
+                    <input type="checkbox" name="smsAlerts" checked={!!formData.smsAlerts} onChange={handleChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                    <div>
+                      <div className="font-semibold text-foreground">SMS Alerts</div>
+                      <div className="text-sm text-muted-foreground">Receive instant SMS for urgent system events.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl cursor-pointer">
+                    <input type="checkbox" name="orderConfirmations" checked={!!formData.orderConfirmations} onChange={handleChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                    <div>
+                      <div className="font-semibold text-foreground">Customer Order Confirmations</div>
+                      <div className="text-sm text-muted-foreground">Automatically send email/SMS receipts to customers.</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "security" && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-foreground mb-6">Security Settings</h2>
+                <div className="space-y-6">
+                  <div>
+                    <label className="flex items-center gap-3 p-4 bg-background border border-border rounded-xl cursor-pointer">
+                      <input type="checkbox" name="twoFactorAuth" checked={!!formData.twoFactorAuth} onChange={handleChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                      <div>
+                        <div className="font-semibold text-foreground">Require Two-Factor Authentication</div>
+                        <div className="text-sm text-muted-foreground">Force all admin users to setup 2FA.</div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Session Timeout (Minutes)</label>
+                      <input type="number" name="sessionTimeout" value={formData.sessionTimeout || 30} onChange={handleChange} min={5} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Password Policy</label>
+                      <select name="passwordPolicy" value={formData.passwordPolicy || "medium"} onChange={handleChange} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                        <option value="low">Low (Minimum 6 characters)</option>
+                        <option value="medium">Medium (Alphanumeric, Min 8)</option>
+                        <option value="high">High (Special Chars, Min 12)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </div>

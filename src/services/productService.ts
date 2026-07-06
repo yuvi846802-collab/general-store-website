@@ -24,7 +24,7 @@ const mapProduct = (p: any): Product => ({
 
 export const productService = {
   getProducts: async (): Promise<Product[]> => {
-    const res = await ApiClient.get('/products');
+    const res = await ApiClient.get(`/products?_t=${Date.now()}`);
     if (!res.ok) throw new Error('Failed to fetch products');
     const json = await res.json();
     const data = json.data || json;

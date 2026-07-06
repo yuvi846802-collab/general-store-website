@@ -9,13 +9,21 @@ import { logger } from './utils/logger';
 import { globalErrorHandler } from './middlewares/error.middleware';
 import { AppError } from './utils/appError';
 
+import http from 'http';
+import { initSocket } from './utils/socket';
+
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+
+// Initialize Socket.IO
+initSocket(server);
 
 // Security Middlewares
 app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -49,7 +57,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
 // Serve static files from public directory
-app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 import authRoutes from './routes/auth.routes';
 import categoryRoutes from './routes/category.routes';
@@ -59,6 +67,7 @@ import heroRoutes from './routes/hero.routes';
 import userRoutes from './routes/user.routes';
 import uploadRoutes from './routes/upload.routes';
 import orderRoutes from './routes/order.routes';
+import inventoryRoutes from './routes/inventory.routes';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -69,6 +78,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/hero', heroRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Health Check
 app.get(['/health', '/api/health'], (req, res) => {
@@ -85,7 +95,7 @@ app.use(globalErrorHandler);
 
 // Start Server conditionally (skip in Vercel serverless environment)
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
   });
 }

@@ -19,7 +19,7 @@ export default function CTASection() {
           <h2 className="text-3xl sm:text-4xl md:text-6xl font-heading font-extrabold mb-6">Visit Hakeem Store Today</h2>
           <p className="text-xl text-teal-100 mb-10 font-medium">Everything You Need, All in One Place.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+917896541230">
+            <a href="tel:+917704849886">
               <Button size="lg" className="w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/90 font-heading text-lg px-8 py-6 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] transition-all">
                 <Phone className="mr-2" size={20} /> Call Now
               </Button>

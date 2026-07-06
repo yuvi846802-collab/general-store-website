@@ -36,14 +36,14 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <h4 className="font-bold text-lg">Address</h4>
-                    <p className="text-muted-foreground">Naryawal, India</p>
+                    <p className="text-muted-foreground">Naryawal, Bareilly, India</p>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-              <a href="tel:+917896541230" className="block">
+              <a href="tel:+917704849886" className="block">
                 <Card className="hover:border-secondary hover:shadow-sm transition-all group">
                   <CardContent className="p-6 flex items-center gap-4">
                     <div className="p-4 bg-secondary/10 text-secondary-foreground rounded-full group-hover:bg-secondary group-hover:text-white transition-colors">
@@ -51,7 +51,7 @@ export default function ContactSection() {
                     </div>
                     <div>
                       <h4 className="font-bold text-lg">Call Us</h4>
-                      <p className="text-muted-foreground">+91 7896541230</p>
+                      <p className="text-muted-foreground">+91 7704849886</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -59,7 +59,7 @@ export default function ContactSection() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-              <a href="https://wa.me/917896541230" target="_blank" rel="noopener noreferrer" className="block">
+              <a href="https://wa.me/917704849886" target="_blank" rel="noopener noreferrer" className="block">
                 <Card className="hover:border-[#25D366] hover:shadow-sm transition-all group">
                   <CardContent className="p-6 flex items-center gap-4">
                     <div className="p-4 bg-[#25D366]/10 text-[#25D366] rounded-full group-hover:bg-[#25D366] group-hover:text-white transition-colors">

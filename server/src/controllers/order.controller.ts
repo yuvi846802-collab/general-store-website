@@ -3,6 +3,7 @@ import prisma from '../utils/prismaClient';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { z } from 'zod';
+import { getIO } from '../utils/socket';
 
 const createOrderSchema = z.object({
   items: z.array(
@@ -151,5 +152,6 @@ export const updateOrderStatus = catchAsync(async (req: Request, res: Response, 
     },
   });
 
+  getIO().emit('inventory:updated');
   res.status(200).json({ status: 'success', order: updatedOrder });
 });

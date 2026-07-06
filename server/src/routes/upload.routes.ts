@@ -37,7 +37,7 @@ const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.
 const upload = multer({ 
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
 router.post('/', requireAuth, requireAdmin, upload.single('image'), (req, res) => {

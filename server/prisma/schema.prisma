@@ -24,6 +24,12 @@ model User {
   resetPasswordToken      String?
   resetPasswordExpiry     DateTime?
   referralCode            String?
+  bio                     String?
+  country                 String?
+  state                   String?
+  city                    String?
+  timezone                String?
+  language                String?
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @updatedAt
 
@@ -66,6 +72,7 @@ model Category {
   description String
   image       String
   slug        String    @unique
+  status      String    @default("active")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -204,6 +211,26 @@ model StoreSettings {
   supportLinks    String   @default("[{\"label\":\"Help Center\",\"url\":\"/help\"},{\"label\":\"Returns & Refunds\",\"url\":\"/returns\"},{\"label\":\"Privacy Policy\",\"url\":\"/privacy\"},{\"label\":\"Terms & Conditions\",\"url\":\"/terms\"},{\"label\":\"Track Your Order\",\"url\":\"/track-order\"}]")
   
   copyrightText   String   @default("© 2026 Hakeem Store. All rights reserved.")
+  
+  // SEO & Web
+  seoTitle        String   @default("Hakeem Store - Your Neighborhood General Store")
+  seoDescription  String   @default("Shop premium groceries, household items, and more at Hakeem Store.")
+  seoKeywords     String   @default("grocery, store, supermart, fresh, household")
+
+  // Theme & Branding
+  primaryColor    String   @default("#14b8a6") // Teal 500
+  fontFamily      String   @default("Inter")
+  darkModeDefault Boolean  @default(false)
+
+  // Notifications
+  emailAlerts        Boolean @default(true)
+  smsAlerts          Boolean @default(false)
+  orderConfirmations Boolean @default(true)
+
+  // Security
+  twoFactorAuth   Boolean  @default(false)
+  sessionTimeout  Int      @default(30) // in minutes
+  passwordPolicy  String   @default("medium") // 'low', 'medium', 'high'
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
