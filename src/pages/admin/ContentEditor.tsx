@@ -9,7 +9,7 @@ import { Link2 } from "lucide-react";
 function SocialMediaEditor() {
   const [links, setLinks] = useState([
     { id: 1, name: "Instagram", url: "https://instagram.com/hakeemstore", enabled: true, isCustom: false },
-    { id: 2, name: "WhatsApp", url: "https://wa.me/919876543210", enabled: true, isCustom: false }
+    { id: 2, name: "WhatsApp", url: "https://wa.me/917704849886", enabled: true, isCustom: false }
   ]);
 
   const addLink = () => {

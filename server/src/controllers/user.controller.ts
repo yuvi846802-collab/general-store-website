@@ -5,16 +5,54 @@ import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 
 export const updateProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { firstName, lastName, phone } = req.body;
+  const { firstName, lastName, phone, profileImage, bio, country, state, city, timezone, language, email } = req.body;
   const userId = req.user?.id;
+
+  const dataToUpdate: any = { phone };
+  if (firstName && lastName) dataToUpdate.name = `${firstName} ${lastName}`;
+  if (firstName) dataToUpdate.firstName = firstName;
+  if (lastName) dataToUpdate.lastName = lastName;
+  
+  if (email) {
+    // Check if email already exists for another user
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser && existingUser.id !== userId) {
+      return next(new AppError('Email is already in use by another account', 400));
+    }
+    dataToUpdate.email = email;
+  }
+  if (profileImage !== undefined) dataToUpdate.profileImage = profileImage;
+  if (bio !== undefined) dataToUpdate.bio = bio;
+  if (country !== undefined) dataToUpdate.country = country;
+  if (state !== undefined) dataToUpdate.state = state;
+  if (city !== undefined) dataToUpdate.city = city;
+  if (timezone !== undefined) dataToUpdate.timezone = timezone;
+  if (language !== undefined) dataToUpdate.language = language;
 
   const updatedUser = await prisma.user.update({
     where: { id: userId },
-    data: { firstName, lastName, phone, name: `${firstName} ${lastName}` }
+    data: dataToUpdate
   });
 
   const { password, ...userWithoutPassword } = updatedUser;
   res.status(200).json({ status: 'success', user: userWithoutPassword });
+});
+
+export const uploadAvatar = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.file) {
+    return next(new AppError('No image file provided', 400));
+  }
+
+  const imageUrl = `/uploads/avatars/${req.file.filename}`;
+  const userId = req.user?.id;
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { profileImage: imageUrl }
+  });
+
+  const { password, ...userWithoutPassword } = updatedUser;
+  res.status(200).json({ status: 'success', user: userWithoutPassword, url: imageUrl });
 });
 
 export const updatePassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {

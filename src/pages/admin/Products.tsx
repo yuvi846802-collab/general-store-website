@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useRealTimeData } from "@/hooks/useRealTimeData";
+import { useInventorySocket } from "@/hooks/useInventorySocket";
 import { productService, Product } from "@/services/productService";
 import { Plus, Search, Filter, Edit, Trash2, Download, Upload, MoreHorizontal, CheckCircle2, XCircle, AlertCircle, Eye, Copy, Power } from "lucide-react";
 import { PremiumImage } from "@/components/ui/PremiumImage";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { getImageUrl } from "@/lib/utils";
-import ImportProductsModal from "@/components/admin/ImportProductsModal";
-import ExportProductsModal from "@/components/admin/ExportProductsModal";
+import { exportService } from "@/services/exportService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,8 +24,6 @@ export default function AdminProducts() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [isImportOpen, setIsImportOpen] = useState(false);
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const updateTrigger = useRealTimeData('product');
@@ -45,6 +43,10 @@ export default function AdminProducts() {
   useEffect(() => {
     fetchProducts();
   }, [updateTrigger]);
+
+  useInventorySocket(() => {
+    fetchProducts();
+  });
 
   const handleDelete = async (id: string) => {
     if (confirm("Delete this product?")) {
@@ -84,6 +86,24 @@ export default function AdminProducts() {
     }
   };
 
+  const handleExportProducts = () => {
+    if (filteredProducts.length === 0) {
+      toast({ title: "No Products", description: "There are no products to export.", variant: "destructive" });
+      return;
+    }
+    const exportData = filteredProducts.map((p) => ({
+      "Product Name": p.name,
+      "SKU": p.sku || p.id || '',
+      "Category": p.category || '',
+      "Price": p.price || 0,
+      "Inventory": p.stock ?? 0,
+      "Status": p.status || 'active'
+    }));
+    const filename = `products_export_${new Date().toISOString().split('T')[0]}`;
+    exportService.downloadCSV(exportData, filename);
+    toast({ title: "Export Successful", description: `Downloaded ${filename}.csv successfully.` });
+  };
+
   const handleDeleteSelected = async () => {
     if (confirm(`Delete ${selectedProducts.length} selected products?`)) {
       // Simulate bulk delete
@@ -103,13 +123,7 @@ export default function AdminProducts() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button 
-            onClick={() => setIsImportOpen(true)}
-            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
-          >
-            <Upload size={16} /> Import
-          </button>
-          <button 
-            onClick={() => setIsExportOpen(true)}
+            onClick={handleExportProducts}
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <Download size={16} /> Export CSV
@@ -212,7 +226,7 @@ export default function AdminProducts() {
               <tr>
                 <th className="px-6 py-4 w-10"></th>
                 <th className="px-6 py-4">Product Details</th>
-                <th className="px-6 py-4">SKU & Category</th>
+                <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">Price</th>
                 <th className="px-6 py-4">Inventory</th>
                 <th className="px-6 py-4">Status</th>
@@ -227,48 +241,47 @@ export default function AdminProducts() {
               ) : (
                 filteredProducts.map((product) => (
                   <tr key={product.id} className={`hover:bg-accent/30 transition-colors group ${selectedProducts.includes(product.id) ? 'bg-primary/5' : ''}`}>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-6">
                       <input 
                         type="checkbox" 
                         checked={selectedProducts.includes(product.id)}
                         onChange={() => handleSelectProduct(product.id)}
-                        className="w-4 h-4 rounded border-input bg-background text-primary focus:ring-primary cursor-pointer" 
+                        className="w-5 h-5 rounded border-input bg-background text-primary focus:ring-primary cursor-pointer" 
                       />
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-background border border-border p-1 flex items-center justify-center shrink-0 shadow-sm">
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-5">
+                        <div className="w-20 h-20 rounded-xl bg-background border border-border p-2 flex items-center justify-center shrink-0 shadow-sm">
                           <PremiumImage src={getImageUrl(product.image)} fallbackText={product.name} className="max-w-full max-h-full object-contain" containerClassName="w-full h-full" />
                         </div>
                         <div>
-                          <div className="font-semibold text-foreground text-sm hover:text-primary cursor-pointer transition-colors" onClick={() => setLocation(`/admin/products/${product.id}`)}>
+                          <div className="font-semibold text-foreground text-base hover:text-primary cursor-pointer transition-colors" onClick={() => setLocation(`/admin/products/${product.id}`)}>
                             {product.name}
                           </div>
-                          {product.tag && <div className="text-[10px] font-bold uppercase text-primary tracking-wider mt-0.5">{product.tag}</div>}
+                          {product.tag && <div className="text-xs font-bold uppercase text-primary tracking-wider mt-1">{product.tag}</div>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-foreground font-medium text-xs font-mono bg-accent/50 inline-block px-2 py-0.5 rounded mb-1 border border-border">HKM-{product.id.padStart(4, '0')}</div>
-                      <div className="text-muted-foreground text-xs">{product.category}</div>
+                    <td className="px-6 py-6">
+                      <div className="text-foreground font-medium text-sm">{product.category}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="font-semibold text-foreground">{product.price}</span>
-                      {product.originalPrice && <span className="text-xs text-muted-foreground line-through ml-2">{product.originalPrice}</span>}
+                    <td className="px-6 py-6">
+                      <span className="font-bold text-foreground text-base">{product.price}</span>
+                      {product.originalPrice && <span className="text-sm text-muted-foreground line-through ml-2">{product.originalPrice}</span>}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-6">
                       <div className="flex items-center gap-2">
-                        {product.stock > 20 ? <CheckCircle2 size={16} className="text-emerald-500" /> : product.stock > 0 ? <AlertCircle size={16} className="text-amber-500" /> : <XCircle size={16} className="text-destructive" />}
-                        <span className="font-medium text-foreground">{product.stock}</span>
-                        <span className="text-muted-foreground text-xs">in stock</span>
+                        {product.stock > 20 ? <CheckCircle2 size={18} className="text-emerald-500" /> : product.stock > 0 ? <AlertCircle size={18} className="text-amber-500" /> : <XCircle size={18} className="text-destructive" />}
+                        <span className="font-medium text-foreground text-base">{product.stock}</span>
+                        <span className="text-muted-foreground text-sm">in stock</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="capitalize px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold rounded-full text-xs border border-emerald-500/20">
+                    <td className="px-6 py-6">
+                      <span className="capitalize px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-sm border border-emerald-500/20">
                         {product.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-6 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => setLocation(`/admin/products/${product.id}`)} className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors" title="Edit">
                           <Edit size={16} />
@@ -326,22 +339,6 @@ export default function AdminProducts() {
           </div>
         </div>
       </div>
-
-      <ImportProductsModal 
-        isOpen={isImportOpen} 
-        onClose={() => setIsImportOpen(false)} 
-        onSuccess={() => {
-          setIsImportOpen(false);
-          fetchProducts();
-        }}
-      />
-
-      <ExportProductsModal
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-        filteredProducts={filteredProducts}
-        allProducts={products}
-      />
     </div>
   );
 }

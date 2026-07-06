@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prismaClient';
 import { z } from 'zod';
+import { getIO } from '../utils/socket';
 
 const productUpdateSchema = z.object({
   name: z.string().optional(),
@@ -67,6 +68,7 @@ export const createProduct = async (req: Request, res: Response) => {
       }
     });
 
+    getIO().emit('inventory:updated');
     res.status(201).json(newProduct);
   } catch (error: any) {
     console.error('Create product error:', error);
@@ -140,6 +142,8 @@ export const updateProduct = async (req: Request, res: Response) => {
       data: updates,
       include: { category: true }
     });
+    
+    getIO().emit('inventory:updated');
     res.status(200).json(updatedProduct);
   } catch (error) {
     console.error('Update product error:', error);
@@ -153,6 +157,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
     await prisma.product.delete({
       where: { id }
     });
+    
+    getIO().emit('inventory:updated');
     res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Delete product error:', error);

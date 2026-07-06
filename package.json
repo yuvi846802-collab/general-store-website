@@ -82,6 +82,7 @@
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "papaparse": "^5.5.4",
+    "socket.io-client": "^4.8.3",
     "swiper": "^14.0.1",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.14"

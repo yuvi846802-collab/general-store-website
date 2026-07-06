@@ -1,23 +1,197 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   User, Mail, Phone, Lock, Edit3, CheckCircle2, 
   Calendar, Shield, Clock, Save, Eye, EyeOff, 
   Monitor, Smartphone, LogOut, ShieldAlert, Key, 
-  Fingerprint, Activity, ShieldCheck
+  Fingerprint, Activity, ShieldCheck, Camera, Loader2
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { getImageUrl, fetchWithAuth, API_URL } from "@/services/api";
 
 export default function AdminProfile() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Profile Form State
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || ""
+  });
+  
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || ""
+      });
+    }
+  }, [user]);
+
+  // Password State
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  // Sessions State
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_URL}/users/sessions`);
+      const data = await res.json();
+      if (data.sessions) {
+        setSessions(data.sessions);
+      }
+    } catch (err) {
+      console.error("Failed to load sessions", err);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      const parts = profileData.name.trim().split(" ");
+      const firstName = parts[0];
+      const lastName = parts.length > 1 ? parts.slice(1).join(" ") : undefined;
+      
+      const res = await fetchWithAuth(`${API_URL}/users/profile`, {
+        method: "PUT",
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phone: profileData.phone,
+          email: profileData.email
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update profile");
+      
+      if (user) {
+        login({ ...user, ...data.user });
+      }
+      toast({ title: "Success", description: "Profile updated successfully." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      return toast({ variant: "destructive", title: "Error", description: "New passwords do not match." });
+    }
+    try {
+      setIsUpdatingPassword(true);
+      const res = await fetchWithAuth(`${API_URL}/users/update-password`, {
+        method: "PUT",
+        body: JSON.stringify(passwordData)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update password");
+      
+      toast({ title: "Success", description: "Password updated successfully." });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleRevokeSession = async (id: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_URL}/users/sessions/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to revoke session");
+      toast({ title: "Session Terminated", description: "Logged out of device successfully." });
+      fetchSessions();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
+  };
+
+  const handleRevokeAllSessions = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_URL}/users/sessions`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to revoke all sessions");
+      toast({ title: "All Sessions Terminated", description: "Logged out of all other devices." });
+      fetchSessions();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    // Validate image type (JPG, JPEG, PNG, WEBP)
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast({ variant: "destructive", title: "Invalid File", description: "Only JPG, JPEG, PNG, and WEBP formats are allowed." });
+      return;
+    }
+
+    // Validate maximum file size (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File Too Large", description: "Maximum file size is 5 MB." });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setIsUploadingImage(true);
+    try {
+      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/upload`, {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed");
+      
+      const updateRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/users/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileImage: uploadData.url }),
+        credentials: "include"
+      });
+      const updateData = await updateRes.json();
+      if (!updateRes.ok) throw new Error(updateData.error || "Profile update failed");
+      
+      if (user) {
+        login({ ...user, profileImage: uploadData.url, avatar: uploadData.url });
+      }
+
+      toast({ title: "Success", description: "Profile photo updated successfully." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   // Animation variants
   const containerVariants = {
@@ -33,10 +207,11 @@ export default function AdminProfile() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } }
   };
 
-  const sessions = [
-    { id: 1, device: "MacBook Pro M3", os: "macOS Sonoma", browser: "Chrome", ip: "192.168.1.105", location: "Mumbai, India", time: "Active now", isCurrent: true, icon: Monitor },
-    { id: 2, device: "iPhone 15 Pro", os: "iOS 17.2", browser: "Safari", ip: "117.214.32.12", location: "Mumbai, India", time: "2 hours ago", isCurrent: false, icon: Smartphone },
-  ];
+  const getSessionIcon = (deviceInfo: string = "") => {
+    const info = deviceInfo.toLowerCase();
+    if (info.includes("mac") || info.includes("windows") || info.includes("pc")) return Monitor;
+    return Smartphone;
+  };
 
   return (
     <div className="space-y-6 pb-20 overflow-x-hidden">
@@ -88,15 +263,27 @@ export default function AdminProfile() {
             
             <div className="px-6 pb-6 relative z-10">
               <div className="flex flex-col items-center -mt-16 mb-4">
-                <div className="relative group/avatar cursor-pointer">
-                  <div className="w-28 h-28 rounded-full bg-card p-1 shadow-2xl">
+                <div className="relative group/avatar">
+                  <div className="w-28 h-28 rounded-full bg-card p-1 shadow-2xl relative">
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-white text-4xl font-heading font-bold overflow-hidden relative">
-                      {user?.name?.substring(0, 2).toUpperCase() || 'AU'}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm" onClick={() => toast({ title: "Camera", description: "Opening file browser to upload photo..." })}>
-                        <Edit3 size={24} className="text-white mb-1" />
-                        <span className="text-[10px] font-medium tracking-wider uppercase">Update</span>
-                      </div>
+                      {user?.profileImage || user?.avatar ? (
+                        <img src={getImageUrl(user.profileImage || user.avatar!)} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        user?.name?.substring(0, 2).toUpperCase() || 'AU'
+                      )}
+                      
+                      {isUploadingImage && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-10">
+                          <Loader2 size={28} className="text-white animate-spin" />
+                        </div>
+                      )}
                     </div>
+                    
+                    {/* Camera Button placed at the bottom right edge */}
+                    <label className="absolute bottom-0 right-0 w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer hover:bg-emerald-600 transition-colors border-4 border-card z-20">
+                      <Camera size={14} />
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploadingImage} />
+                    </label>
                   </div>
                 </div>
                 
@@ -113,8 +300,8 @@ export default function AdminProfile() {
 
               <div className="space-y-4 pt-6 mt-4 border-t border-border/50">
                 {[
-                  { icon: Mail, label: "Email Address", value: "admin@hakeemstore.com" },
-                  { icon: Phone, label: "Phone Number", value: "+91 9876543210" },
+                  { icon: Mail, label: "Email Address", value: user?.email || "admin@hakeemstore.com" },
+                  { icon: Phone, label: "Phone Number", value: user?.phone || "Not set" },
                   { icon: Calendar, label: "Member Since", value: "May 15, 2024" },
                   { icon: Clock, label: "Last Login", value: "Today, 10:30 AM" }
                 ].map((item, idx) => (
@@ -188,25 +375,61 @@ export default function AdminProfile() {
             </div>
 
             <div className="space-y-5">
-              {[
-                { label: "Full Name", icon: User, type: "text", value: "Admin User" },
-                { label: "Email Address", icon: Mail, type: "email", value: "admin@hakeemstore.com" },
-                { label: "Phone Number", icon: Phone, type: "text", value: "+91 9876543210" }
-              ].map((field, idx) => (
-                <div key={idx} className="group">
-                  <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">{field.label}</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-indigo-500 transition-colors">
-                      <field.icon size={18} />
-                    </div>
-                    <input 
-                      type={field.type} 
-                      defaultValue={field.value} 
-                      className="w-full bg-accent/30 border border-border rounded-xl pl-12 pr-4 py-3 text-sm text-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:border-border/80" 
-                    />
+              <div className="group">
+                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-indigo-500 transition-colors">
+                    <User size={18} />
                   </div>
+                  <input 
+                    type="text" 
+                    value={profileData.name}
+                    onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                    className="w-full bg-accent/30 border border-border rounded-xl pl-12 pr-4 py-3 text-sm text-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:border-border/80" 
+                  />
                 </div>
-              ))}
+              </div>
+
+              <div className="group">
+                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Email Address</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-indigo-500 transition-colors">
+                    <Mail size={18} />
+                  </div>
+                  <input 
+                    type="email" 
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    className="w-full bg-accent/30 border border-border rounded-xl pl-12 pr-4 py-3 text-sm text-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:border-border/80" 
+                  />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Phone Number</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-indigo-500 transition-colors">
+                    <Phone size={18} />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                    className="w-full bg-accent/30 border border-border rounded-xl pl-12 pr-4 py-3 text-sm text-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all hover:border-border/80" 
+                  />
+                </div>
+              </div>
+              
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className="bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow hover:bg-indigo-600 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
+                  Save Details
+                </button>
+              </div>
             </div>
           </motion.div>
 
@@ -229,6 +452,8 @@ export default function AdminProfile() {
                   <input 
                     type={showCurrentPassword ? "text" : "password"} 
                     placeholder="Enter current password" 
+                    value={passwordData.currentPassword}
+                    onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})}
                     className="w-full bg-accent/30 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" 
                   />
                   <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-foreground transition-colors">
@@ -244,6 +469,8 @@ export default function AdminProfile() {
                     <input 
                       type={showNewPassword ? "text" : "password"} 
                       placeholder="New password" 
+                      value={passwordData.newPassword}
+                      onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
                       className="w-full bg-accent/30 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" 
                     />
                     <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-foreground transition-colors">
@@ -257,6 +484,8 @@ export default function AdminProfile() {
                     <input 
                       type={showConfirmPassword ? "text" : "password"} 
                       placeholder="Confirm password" 
+                      value={passwordData.confirmPassword}
+                      onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                       className="w-full bg-accent/30 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" 
                     />
                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted-foreground hover:text-foreground transition-colors">
@@ -284,10 +513,11 @@ export default function AdminProfile() {
 
               <div className="pt-2">
                 <button 
-                  onClick={() => toast({ title: "Security Updated", description: "Your new password is now active." })}
-                  className="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 w-max shadow-sm"
+                  onClick={handleUpdatePassword}
+                  disabled={isUpdatingPassword || !passwordData.currentPassword || !passwordData.newPassword}
+                  className="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 w-max shadow-sm disabled:opacity-50"
                 >
-                  <Lock size={16} /> Update Password
+                  {isUpdatingPassword ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />} Update Password
                 </button>
               </div>
             </div>
@@ -351,46 +581,61 @@ export default function AdminProfile() {
             </div>
             
             <div className="space-y-4">
-              {sessions.map((session) => (
-                <div key={session.id} className="p-4 bg-background border border-border rounded-xl hover:border-primary/30 transition-colors group">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex gap-3">
-                      <div className={`p-2 rounded-lg shrink-0 ${session.isCurrent ? 'bg-primary/10 text-primary' : 'bg-accent text-muted-foreground'}`}>
-                        <session.icon size={18} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-foreground flex items-center gap-2">
-                          {session.device}
-                          {session.isCurrent && <span className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">This Device</span>}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{session.browser} on {session.os}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-3 border-t border-border border-dashed">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-medium">{session.location} • {session.ip}</p>
-                      <p className={`text-[10px] font-semibold mt-0.5 ${session.isCurrent ? 'text-emerald-500' : 'text-muted-foreground'}`}>{session.time}</p>
-                    </div>
-                    
-                    {!session.isCurrent && (
-                      <button 
-                        onClick={() => toast({ title: "Session Terminated", description: `Logged out of ${session.device} successfully.` })}
-                        className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                        title="Log out of device"
-                      >
-                        <LogOut size={14} />
-                      </button>
-                    )}
-                  </div>
+              {isLoadingSessions ? (
+                <div className="flex justify-center p-8">
+                  <Loader2 className="animate-spin text-muted-foreground" size={24} />
                 </div>
-              ))}
+              ) : sessions.length === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground bg-accent/20 rounded-xl">No active sessions found</div>
+              ) : (
+                sessions.map((session) => {
+                  const Icon = getSessionIcon(session.deviceInfo);
+                  const isCurrent = false; // We could determine this if we had the current session ID
+                  return (
+                    <div key={session.id} className="p-4 bg-background border border-border rounded-xl hover:border-primary/30 transition-colors group">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex gap-3">
+                          <div className={`p-2 rounded-lg shrink-0 ${isCurrent ? 'bg-primary/10 text-primary' : 'bg-accent text-muted-foreground'}`}>
+                            <Icon size={18} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                              {session.deviceInfo || "Unknown Device"}
+                              {isCurrent && <span className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">This Device</span>}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{session.ipAddress || "Unknown IP"}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-border border-dashed">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground font-medium">Expires: {new Date(session.expiresAt).toLocaleDateString()}</p>
+                          <p className={`text-[10px] font-semibold mt-0.5 ${isCurrent ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                            Started: {new Date(session.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        
+                        {!isCurrent && (
+                          <button 
+                            onClick={() => handleRevokeSession(session.id)}
+                            className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                            title="Log out of device"
+                          >
+                            <LogOut size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
             
             <button 
-              onClick={() => toast({ title: "All Sessions Terminated", description: "You have been logged out of all other devices." })}
-              className="w-full mt-4 py-2.5 text-xs font-bold text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors"
+              onClick={handleRevokeAllSessions}
+              disabled={sessions.length === 0}
+              className="w-full mt-4 py-2.5 text-xs font-bold text-destructive bg-destructive/5 hover:bg-destructive/10 border border-destructive/20 rounded-xl transition-colors disabled:opacity-50"
             >
               Sign out of all other devices
             </button>

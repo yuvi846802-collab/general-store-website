@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { getImageUrl } from "@/services/api";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -40,6 +41,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     logout();
     setLocation("/admin/login");
   };
+
+  const isEditorRoute = location.includes('/products/new') || 
+                        (location.startsWith('/admin/products/') && location !== '/admin/products') ||
+                        location.includes('/categories/new') ||
+                        (location.startsWith('/admin/categories/') && location !== '/admin/categories');
+
 
   return (
     <ProtectedRoute>
@@ -123,8 +130,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <p className="text-[11px] text-muted-foreground capitalize leading-none">{user?.role}</p>
                 </div>
                 <div className="w-9 h-9 rounded-full bg-accent border border-border flex items-center justify-center overflow-hidden">
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                  {user?.profileImage || user?.avatar ? (
+                    <img src={getImageUrl(user.profileImage || user.avatar!)} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <div className="bg-primary w-full h-full flex items-center justify-center text-primary-foreground font-bold text-sm">
                       {user?.name?.substring(0, 2).toUpperCase() || 'AD'}
@@ -137,7 +144,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </header>
 
           {/* Page Content Scroll Area */}
-          <main id="main-scroll-area" className={`flex-1 flex flex-col overflow-x-hidden overflow-y-auto px-4 sm:px-8 pb-4 sm:pb-8 relative ${location.includes('/products/new') || (location.startsWith('/admin/products/') && location !== '/admin/products') ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
+          <main id="main-scroll-area" className={`flex-1 flex flex-col overflow-x-hidden overflow-y-auto px-4 sm:px-8 pb-4 sm:pb-8 relative ${isEditorRoute ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
             <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col">
               <AnimatePresence mode="wait">
                 <motion.div

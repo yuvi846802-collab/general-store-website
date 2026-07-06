@@ -5,10 +5,11 @@ import { lazy, Suspense } from "react";
 const Footer = lazy(() => import("@/components/Footer"));
 
 export default function Page() {
-  const [match, params] = useRoute("/:slug");
+  const path = window.location.pathname;
+  const slug = path.split('/').pop() || 'page';
   
-  const title = params?.slug 
-    ? params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+  const title = slug 
+    ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) 
     : "Page";
 
   return (

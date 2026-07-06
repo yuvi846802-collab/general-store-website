@@ -200,7 +200,7 @@ export default function WhyChooseUs() {
                 Visit Our Store
               </Button>
             </a>
-            <a href="tel:+917896541230" className="w-full sm:w-auto">
+            <a href="tel:+917704849886" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-6 py-5 gap-2 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] font-medium border-0">
                 <Phone size={18} />
                 Call Us Now

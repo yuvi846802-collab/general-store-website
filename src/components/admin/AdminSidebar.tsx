@@ -52,7 +52,6 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
       title: "Growth",
       items: [
         { icon: TrendingUp, label: "Analytics", path: "/admin/analytics" },
-        { icon: Percent, label: "Coupons", path: "/admin/coupons" },
         { icon: Megaphone, label: "Marketing", path: "/admin/marketing" },
         { icon: MessageSquare, label: "Reviews", path: "/admin/reviews" },
       ]
@@ -61,18 +60,14 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
       title: "Content",
       items: [
         { icon: Hash, label: "Social Media", path: "/admin/content/social" },
-        { icon: ImageIcon, label: "Hero Settings", path: "/admin/hero" },
         { icon: Info, label: "About", path: "/admin/content/about" },
         { icon: ShieldCheck, label: "Why Choose Us", path: "/admin/content/why-us" },
-        { icon: BarChart3, label: "Statistics", path: "/admin/content/stats" },
         { icon: Phone, label: "Contact Info", path: "/admin/content/contact" },
-        { icon: LayoutTemplate, label: "Footer", path: "/admin/content/footer" },
       ]
     },
     {
       title: "System",
       items: [
-        { icon: FolderOpen, label: "Media Library", path: "/admin/media" },
         { icon: Settings, label: "Settings", path: "/admin/settings" },
         { icon: UserCircle, label: "Profile", path: "/admin/profile" },
       ]

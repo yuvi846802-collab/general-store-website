@@ -9,13 +9,22 @@ import { sendEmail } from '../utils/email';
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../validators/auth.validator';
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
 
-const setTokenCookies = (res: Response, refreshToken: string) => {
+const setTokenCookies = (res: Response, refreshToken: string, accessToken?: string) => {
   res.cookie('jwt_refresh', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
   });
+
+  if (accessToken) {
+    res.cookie('jwt', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours (matching access token expiry)
+    });
+  }
 };
 
 export const register = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -109,7 +118,7 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
     data: { userId: user.id, action: 'LOGIN', ipAddress, userAgent: deviceInfo }
   });
 
-  setTokenCookies(res, refreshTokenString);
+  setTokenCookies(res, refreshTokenString, accessToken);
 
   const { password: _, ...userWithoutPassword } = user;
   res.status(200).json({
@@ -136,6 +145,13 @@ export const refresh = catchAsync(async (req: Request, res: Response, next: Next
 
   const accessToken = signToken(session.user.id, session.user.role);
 
+  res.cookie('jwt', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
   res.status(200).json({
     status: 'success',
     accessToken,
@@ -151,6 +167,13 @@ export const logout = catchAsync(async (req: Request, res: Response, next: NextF
   }
 
   res.clearCookie('jwt_refresh', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  
+  // Clear jwt token
+  res.clearCookie('jwt', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -305,7 +328,7 @@ export const resetPassword = catchAsync(async (req: Request, res: Response, next
     }
   });
 
-  setTokenCookies(res, refreshTokenString);
+  setTokenCookies(res, refreshTokenString, accessToken);
 
   res.status(200).json({ status: 'success', accessToken });
 });

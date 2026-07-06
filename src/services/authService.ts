@@ -2,10 +2,22 @@ import { API_URL, fetchWithAuth } from './api';
 
 export interface User {
   id: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
   email: string;
-  role: 'admin';
+  phone?: string;
+  role: string;
   avatar?: string;
+  profileImage?: string;
+  isVerified?: boolean;
+  bio?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  timezone?: string;
+  language?: string;
+  createdAt?: string;
 }
 
 let currentUser: User | null = null;

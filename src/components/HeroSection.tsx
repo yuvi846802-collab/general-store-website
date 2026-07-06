@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import { getActiveHeroSlides, HeroSlide } from '@/services/heroService';
+import { useRealTimeData } from '@/hooks/useRealTimeData';
+import { useInventorySocket } from '@/hooks/useInventorySocket';
 
 const fallbackSlides: HeroSlide[] = [
   {
@@ -93,7 +95,7 @@ const fallbackSlides: HeroSlide[] = [
     highlightText: 'in Naryawal',
     description: 'Quality Products • Affordable Prices • Trusted by Families',
     primaryBtnText: 'Call Now',
-    primaryBtnLink: 'tel:+917896541230',
+    primaryBtnLink: 'tel:+917704849886',
     secondaryBtnText: 'Visit Store',
     secondaryBtnLink: '/contact',
     overlayColor: 'dark',
@@ -160,22 +162,27 @@ const scaleUpVariant: any = {
 export default function HeroSection() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  
+  const updateTrigger = useRealTimeData('hero');
 
-  useEffect(() => {
-    const fetchSlides = async () => {
-      try {
-        const data = await getActiveHeroSlides();
-        if (data.length > 0) {
-          setSlides(data);
-        } else {
-          setSlides(fallbackSlides);
-        }
-      } catch (error) {
+  const fetchSlides = useCallback(async () => {
+    try {
+      const data = await getActiveHeroSlides();
+      if (data.length > 0) {
+        setSlides(data);
+      } else {
         setSlides(fallbackSlides);
       }
-    };
-    fetchSlides();
+    } catch (error) {
+      setSlides(fallbackSlides);
+    }
   }, []);
+
+  useInventorySocket(fetchSlides);
+
+  useEffect(() => {
+    fetchSlides();
+  }, [fetchSlides, updateTrigger]);
 
   const nextSlide = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % slides.length);
@@ -215,6 +222,7 @@ export default function HeroSection() {
 
   return (
     <section 
+      id="home"
       className="relative w-full h-[75vh] md:h-[85vh] lg:h-[100vh] min-h-[600px] overflow-hidden bg-black group"
     >
       <AnimatePresence>
@@ -224,22 +232,22 @@ export default function HeroSection() {
           initial="enter"
           animate="center"
           exit="exit"
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full pointer-events-none"
         >
           {/* Background Image (Fixed position, only faded via parent) */}
           <div className="absolute inset-0 w-full h-full">
             <img 
               src={activeSlide.image} 
               alt={activeSlide.heading} 
-              className="w-full h-full object-cover object-center" 
+              className="w-full h-full object-cover object-center pointer-events-none" 
             />
           </div>
 
           {/* Overlay */}
-          <div className={`absolute inset-0 ${overlayClass}`} />
+          <div className={`absolute inset-0 pointer-events-none ${overlayClass}`} />
 
           {/* Content */}
-          <div className="relative h-full container mx-auto px-4 md:px-6 z-10 flex flex-col justify-center">
+          <div className="relative h-full container mx-auto px-4 md:px-6 z-10 flex flex-col justify-center pointer-events-auto">
             <motion.div 
               className={`max-w-3xl flex flex-col ${alignClass}`}
               variants={textContainerVariants}
@@ -268,20 +276,40 @@ export default function HeroSection() {
               )}
               
               {activeSlide.ctaVisible && (
-                <motion.div variants={fadeUpVariant} className="flex flex-wrap gap-4 mt-2">
-                  <Link href={activeSlide.primaryBtnLink || '/products'}>
-                    <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-lg shadow-primary/30 hover:-translate-y-1 hover:shadow-xl flex items-center gap-2">
-                      {activeSlide.primaryBtnText || 'Shop Now'}
-                      <ChevronRight size={20} />
-                    </button>
-                  </Link>
-                  {activeSlide.secondaryBtnText && (
-                    <Link href={activeSlide.secondaryBtnLink || '/offers'}>
-                      <button className={`px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl border-2 backdrop-blur-sm ${activeSlide.overlayColor === 'light' ? 'bg-white/50 border-black/10 text-black hover:bg-white/80' : 'bg-black/20 border-white/20 text-white hover:bg-black/40'}`}>
+                <motion.div variants={fadeUpVariant} className="flex flex-wrap gap-4 mt-2 relative z-20">
+                  {(() => {
+                    const link = activeSlide.primaryBtnLink || '/products';
+                    const isExternal = link.startsWith('http') || link.startsWith('tel:') || link.startsWith('mailto:');
+                    const className = "bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-lg shadow-primary/30 hover:-translate-y-1 hover:shadow-xl flex items-center gap-2 relative z-30 cursor-pointer";
+                    
+                    return isExternal ? (
+                      <a href={link} className={className}>
+                        {activeSlide.primaryBtnText || 'Shop Now'}
+                        <ChevronRight size={20} />
+                      </a>
+                    ) : (
+                      <Link href={link} className={className}>
+                        {activeSlide.primaryBtnText || 'Shop Now'}
+                        <ChevronRight size={20} />
+                      </Link>
+                    );
+                  })()}
+                  
+                  {activeSlide.secondaryBtnText && (() => {
+                    const link = activeSlide.secondaryBtnLink || '/offers';
+                    const isExternal = link.startsWith('http') || link.startsWith('tel:') || link.startsWith('mailto:');
+                    const className = `px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl border-2 backdrop-blur-sm relative z-30 cursor-pointer flex items-center justify-center ${activeSlide.overlayColor === 'light' ? 'bg-white/50 border-black/10 text-black hover:bg-white/80' : 'bg-black/20 border-white/20 text-white hover:bg-black/40'}`;
+                    
+                    return isExternal ? (
+                      <a href={link} className={className}>
                         {activeSlide.secondaryBtnText}
-                      </button>
-                    </Link>
-                  )}
+                      </a>
+                    ) : (
+                      <Link href={link} className={className}>
+                        {activeSlide.secondaryBtnText}
+                      </Link>
+                    );
+                  })()}
                 </motion.div>
               )}
             </motion.div>

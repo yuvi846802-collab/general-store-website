@@ -8,6 +8,13 @@ export const getAuthHeaders = () => {
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+export const getImageUrl = (url: string | undefined) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const backendUrl = API_URL.replace('/api', '');
+  return `${backendUrl}${url}`;
+};
+
 // Helper for fetch with credentials
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
@@ -288,6 +295,21 @@ export const createCategory = async (data: CategoryFormData): Promise<{ id: stri
   }
 };
 
+export const refreshInventory = async () => {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/inventory/refresh`, {
+      method: 'GET'
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to refresh inventory');
+    }
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to connect to server');
+  }
+};
+
 export type ProductFormData = {
   name: string;
   description?: string;
@@ -306,7 +328,7 @@ export type ProductFormData = {
 
 export const fetchPublicProducts = async (): Promise<any[]> => {
   try {
-    const response = await fetch(`${API_URL}/products`);
+    const response = await fetch(`${API_URL}/products?_t=${Date.now()}`);
     const result = await response.json();
     if (!response.ok) {
       throw new Error(result.error || 'Failed to fetch products');

@@ -10,6 +10,11 @@ import { CartDrawer } from "@/components/CartDrawer";
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/Home"));
 const Page = lazy(() => import("@/pages/Page"));
+const Categories = lazy(() => import("@/pages/Categories"));
+const Products = lazy(() => import("@/pages/Products"));
+const Offers = lazy(() => import("@/pages/Offers"));
+const About = lazy(() => import("@/pages/About"));
+const Contact = lazy(() => import("@/pages/Contact"));
 const UserProfile = lazy(() => import("@/pages/user/Profile"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const OrderSuccess = lazy(() => import("@/pages/OrderSuccess"));
@@ -25,6 +30,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminProducts from "@/pages/admin/Products";
 import AdminProductEditor from "@/pages/admin/ProductEditor";
 import AdminCategories from "@/pages/admin/Categories";
+import AdminCategoryEditor from "@/pages/admin/CategoryEditor";
 import AdminAnalytics from "@/pages/admin/Analytics";
 import AdminSettings from "@/pages/admin/Settings";
 import AdminOrders from "@/pages/admin/Orders";
@@ -53,14 +59,19 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/order-success/:id" component={OrderSuccess} />
-        <Route path="/about" component={Page} />
+        <Route path="/products" component={Products} />
+        <Route path="/about" component={About} />
         <Route path="/faqs" component={Page} />
         <Route path="/help" component={Page} />
         <Route path="/returns" component={Page} />
         <Route path="/privacy" component={Page} />
         <Route path="/terms" component={Page} />
         <Route path="/track-order" component={Page} />
-        <Route path="/contact" component={Page} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/shipping" component={Page} />
+        <Route path="/categories" component={Categories} />
+        <Route path="/offers" component={Offers} />
+        <Route path="/category/:slug" component={Page} />
         
         {/* Auth Routes */}
         <Route path="/login" component={Login} />
@@ -83,6 +94,8 @@ function Router() {
               <Route path="/admin/products/new"><AdminProductEditor /></Route>
               <Route path="/admin/products/:id"><AdminProductEditor /></Route>
               <Route path="/admin/products"><AdminProducts /></Route>
+              <Route path="/admin/categories/new"><AdminCategoryEditor /></Route>
+              <Route path="/admin/categories/:id"><AdminCategoryEditor /></Route>
               <Route path="/admin/categories"><AdminCategories /></Route>
               <Route path="/admin/inventory"><AdminInventory /></Route>
               <Route path="/admin/orders"><AdminOrders /></Route>

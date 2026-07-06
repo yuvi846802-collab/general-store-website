@@ -21,6 +21,26 @@ export interface StoreSettings {
   quickLinks: string; // JSON string
   supportLinks: string; // JSON string
   
+  // SEO & Web
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string;
+
+  // Theme & Branding
+  primaryColor: string;
+  fontFamily: string;
+  darkModeDefault: boolean;
+
+  // Notifications
+  emailAlerts: boolean;
+  smsAlerts: boolean;
+  orderConfirmations: boolean;
+
+  // Security
+  twoFactorAuth: boolean;
+  sessionTimeout: number;
+  passwordPolicy: string;
+
   copyrightText: string;
 }
 

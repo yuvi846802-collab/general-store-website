@@ -6,34 +6,26 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useSearch, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { CategoryModal } from "./categories/CategoryModal";
 import { categoryService, Category } from "@/services/categoryService";
 import { getImageUrl } from "@/lib/utils";
+import { useInventorySocket } from "@/hooks/useInventorySocket";
 
-interface CategoryFormValues {
-  name: string;
-  slug: string;
-  description: string;
-  image: string;
-  status: "active" | "inactive";
-}
+
 
 export default function AdminCategories() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const updateTrigger = useRealTimeData('category');
   const searchString = useSearch();
   const [, setLocation] = useLocation();
 
-  // Open modal if ?new=true is in the URL
+  // Redirect to new page if ?new=true is in the URL
   useEffect(() => {
     const searchParams = new URLSearchParams(searchString);
     if (searchParams.get('new') === 'true') {
-      setIsModalOpen(true);
-      setLocation('/admin/categories', { replace: true });
+      setLocation('/admin/categories/new', { replace: true });
     }
   }, [searchString, setLocation]);
 
@@ -48,6 +40,8 @@ export default function AdminCategories() {
       setIsLoading(false);
     }
   };
+
+  useInventorySocket(fetchCategories);
 
   useEffect(() => {
     fetchCategories();
@@ -64,25 +58,7 @@ export default function AdminCategories() {
     }
   };
 
-  const createMutation = useMutation({
-    mutationFn: (data: CategoryFormValues) => categoryService.createCategory(data as any),
-    onSuccess: (newCat) => {
-      // Real-time: add to list immediately without waiting for refetch
-      setCategories(prev => [{ ...newCat, _count: { products: 0 } }, ...prev]);
-      setIsModalOpen(false);
-      toast({
-        title: "✅ Category created!",
-        description: `"${newCat.name}" has been added to your catalog.`,
-      });
-    },
-    onError: (e: any) => {
-      toast({
-        variant: "destructive",
-        title: "Failed to create category",
-        description: e?.message || "Please check your connection and try again.",
-      });
-    },
-  });
+
 
   const filteredCategories = categories.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -96,7 +72,7 @@ export default function AdminCategories() {
           <p className="text-sm text-muted-foreground">Manage product collections and taxonomy.</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setLocation("/admin/categories/new")}
           className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
         >
           <Plus size={16} /> Add Category
@@ -179,6 +155,7 @@ export default function AdminCategories() {
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-border">
                   <button
+                    onClick={() => setLocation(`/admin/categories/${cat.id}`)}
                     className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors border border-transparent hover:border-border"
                     title="Edit"
                   >
@@ -210,7 +187,7 @@ export default function AdminCategories() {
           </p>
           {!searchTerm && (
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setLocation("/admin/categories/new")}
               className="mt-4 bg-primary text-primary-foreground px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
             >
               <Plus size={16} /> Add Category
@@ -219,14 +196,7 @@ export default function AdminCategories() {
         </div>
       )}
 
-      {/* Add Category Modal */}
-      <CategoryModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={(data) => createMutation.mutate(data)}
-        isSubmitting={createMutation.isPending}
-        error={createMutation.error?.message}
-      />
+
     </div>
   );
 }

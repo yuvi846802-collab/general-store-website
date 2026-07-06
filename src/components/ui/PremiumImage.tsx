@@ -17,11 +17,22 @@ export function PremiumImage({
 }: PremiumImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
   
   // Reset states if src changes
   useEffect(() => {
     setIsLoading(true);
     setHasError(false);
+  }, [src]);
+
+  // Check if image is already loaded from cache
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      if (imgRef.current.naturalWidth === 0) {
+        setHasError(true);
+      }
+      setIsLoading(false);
+    }
   }, [src]);
 
   // Handle case where src is empty or undefined
@@ -63,6 +74,7 @@ export function PremiumImage({
         </div>
       ) : (
         <img
+          ref={imgRef}
           src={src}
           alt={alt || "Image"}
           className={cn(
