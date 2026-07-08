@@ -28,8 +28,11 @@ model User {
   country                 String?
   state                   String?
   city                    String?
+  address                 String?
   timezone                String?
   language                String?
+  gender                  String?
+  dateOfBirth             DateTime?
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @updatedAt
 
@@ -45,6 +48,9 @@ model Session {
   id           String   @id @default(uuid())
   refreshToken String   @unique
   deviceInfo   String?
+  browser      String?
+  os           String?
+  deviceType   String?
   ipAddress    String?
   expiresAt    DateTime
   createdAt    DateTime @default(now())
@@ -63,7 +69,23 @@ model AuditLog {
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
+model Otp {
+  id         String   @id @default(uuid())
+  userId     String?
+  email      String?
+  phone      String?
+  otpHash    String
+  purpose    String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  resends    Int      @default(0)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  @@index([email, purpose])
+  @@index([phone, purpose])
+}
 
 
 model Category {
@@ -257,4 +279,20 @@ model HeroSlide {
   transitionDuration Int     @default(1000)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model WhyChooseUsFeature {
+  id           String    @id @default(uuid())
+  title        String
+  description  String
+  icon         String?   // Name of Lucide icon, e.g. 'ShieldCheck'
+  image        String?   // URL for uploaded image
+  color        String?   // Tailwind color class
+  displayOrder Int       @default(0)
+  status       String    @default("ACTIVE") // ACTIVE, INACTIVE
+  createdBy    String?
+  updatedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 }

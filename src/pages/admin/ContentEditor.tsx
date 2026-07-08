@@ -4,9 +4,10 @@ import { Save, Image as ImageIcon, Hash, MessageSquare, MapPin, GripVertical, Tr
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { Link2 } from "lucide-react";
-
-function SocialMediaEditor() {
+import { Link2, Edit, Loader2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import ApiClient from '@/lib/api';
+import { WhyChooseUsModal, FeatureFormValues } from '@/components/admin/WhyChooseUsModal';function SocialMediaEditor() {
   const [links, setLinks] = useState([
     { id: 1, name: "Instagram", url: "https://instagram.com/hakeemstore", enabled: true, isCustom: false },
     { id: 2, name: "WhatsApp", url: "https://wa.me/917704849886", enabled: true, isCustom: false }
@@ -114,6 +115,251 @@ function SocialMediaEditor() {
   );
 }
 
+function WhyChooseUsEditor() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFeature, setEditingFeature] = useState<any>(null);
+  
+  // Drag and drop state
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['why-choose-us'],
+    queryFn: async () => {
+      const res = await ApiClient.get('/why-choose-us');
+      if (!res.ok) throw new Error('Failed to fetch features');
+      return res.json();
+    }
+  });
+  
+  const features = response?.data || [];
+
+  const createMutation = useMutation({
+    mutationFn: async (data: FeatureFormValues) => {
+      const res = await ApiClient.post('/why-choose-us', data);
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.message || 'Failed to create feature');
+      return resData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['why-choose-us'] });
+      toast({ title: "Success", description: "Feature created successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: FeatureFormValues & { id: string }) => {
+      const { id, ...rest } = data;
+      const res = await ApiClient.put(`/why-choose-us/${id}`, rest);
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.message || 'Failed to update feature');
+      return resData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['why-choose-us'] });
+      toast({ title: "Success", description: "Feature updated successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await ApiClient.delete(`/why-choose-us/${id}`);
+      if (!res.ok) throw new Error('Failed to delete feature');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['why-choose-us'] });
+      toast({ title: "Success", description: "Feature deleted successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+      const res = await ApiClient.patch(`/why-choose-us/status/${id}`, { status });
+      if (!res.ok) throw new Error('Failed to update status');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['why-choose-us'] });
+    }
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: async (items: { id: string, displayOrder: number }[]) => {
+      const res = await ApiClient.patch('/why-choose-us/order/update', { items });
+      if (!res.ok) throw new Error('Failed to update order');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['why-choose-us'] });
+    }
+  });
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedItemId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    // Small delay to prevent drag image from disappearing
+    setTimeout(() => {
+      const el = document.getElementById(`feature-${id}`);
+      if (el) el.classList.add('opacity-50');
+    }, 0);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    
+    if (draggedItemId) {
+      const el = document.getElementById(`feature-${draggedItemId}`);
+      if (el) el.classList.remove('opacity-50');
+    }
+
+    if (!draggedItemId || draggedItemId === targetId) return;
+
+    const newFeatures = [...features];
+    const draggedIndex = newFeatures.findIndex(f => f.id === draggedItemId);
+    const targetIndex = newFeatures.findIndex(f => f.id === targetId);
+
+    const [draggedItem] = newFeatures.splice(draggedIndex, 1);
+    newFeatures.splice(targetIndex, 0, draggedItem);
+
+    const reorderedItems = newFeatures.map((f, index) => ({ id: f.id, displayOrder: index }));
+    reorderMutation.mutate(reorderedItems);
+    setDraggedItemId(null);
+  };
+
+  const handleDragEnd = () => {
+    if (draggedItemId) {
+      const el = document.getElementById(`feature-${draggedItemId}`);
+      if (el) el.classList.remove('opacity-50');
+    }
+    setDraggedItemId(null);
+  };
+
+  const openAddModal = () => {
+    setEditingFeature(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (feature: any) => {
+    setEditingFeature(feature);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitModal = async (data: FeatureFormValues) => {
+    if (editingFeature) {
+      await updateMutation.mutateAsync({ ...data, id: editingFeature.id });
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center py-10"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>;
+  }
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+      <h3 className="text-lg font-bold text-foreground mb-6">Why Choose Us Features</h3>
+      <div className="space-y-4">
+        {features.map((feature: any) => (
+          <div 
+            key={feature.id} 
+            id={`feature-${feature.id}`}
+            draggable
+            onDragStart={(e) => handleDragStart(e, feature.id)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, feature.id)}
+            onDragEnd={handleDragEnd}
+            className="flex items-center justify-between p-4 border border-border rounded-xl bg-background transition-all hover:bg-accent/30 cursor-move"
+          >
+            <div className="flex items-center gap-4 flex-1 mr-4">
+              <GripVertical className="text-muted-foreground/50 shrink-0" size={20} />
+              {feature.image ? (
+                <img src={feature.image} alt={feature.title} className="w-10 h-10 object-contain rounded-md bg-accent" />
+              ) : (
+                <div className={`w-10 h-10 rounded-md flex items-center justify-center bg-accent border border-border shrink-0 ${feature.color}`}>
+                  <ImageIcon size={20} />
+                </div>
+              )}
+              <div>
+                <p className="font-bold text-foreground">{feature.title}</p>
+                <p className="text-sm text-muted-foreground line-clamp-1">{feature.description}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 shrink-0">
+              <label className="relative inline-flex items-center cursor-pointer" onClick={e => e.stopPropagation()}>
+                <input 
+                  type="checkbox" 
+                  checked={feature.status === 'ACTIVE'}
+                  onChange={(e) => toggleStatusMutation.mutate({ id: feature.id, status: e.target.checked ? 'ACTIVE' : 'INACTIVE' })}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+              </label>
+              
+              <button 
+                onClick={(e) => { e.stopPropagation(); openEditModal(feature); }}
+                className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors border border-border/50"
+                title="Edit Feature"
+              >
+                <Edit size={18} />
+              </button>
+              
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation();
+                  if (confirm('Are you sure you want to delete this feature?')) {
+                    deleteMutation.mutate(feature.id);
+                  }
+                }}
+                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors border border-border/50"
+                title="Remove Feature"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          </div>
+        ))}
+        {features.length === 0 && (
+          <div className="text-center py-10 text-muted-foreground border-2 border-dashed border-border rounded-xl">
+            No features added yet. Click below to add one.
+          </div>
+        )}
+      </div>
+      
+      <button 
+        onClick={openAddModal}
+        className="w-full py-3 border-2 border-dashed border-teal-500/30 rounded-xl font-semibold text-teal-500 hover:bg-teal-500/5 transition-colors flex items-center justify-center gap-2"
+      >
+        <span>+</span> Add New Feature
+      </button>
+
+      <WhyChooseUsModal 
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleSubmitModal}
+        initialData={editingFeature}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
+    </div>
+  );
+}
+
 export default function AdminContentEditor() {
   const [match, params] = useRoute("/admin/content/:section");
   const { toast } = useToast();
@@ -184,31 +430,7 @@ export default function AdminContentEditor() {
           </div>
         );
       case "why-us":
-        return (
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold text-foreground mb-6">Why Choose Us Features</h3>
-            {[
-              { title: "Quality Products", desc: "We provide 100% quality products." },
-              { title: "Best Prices", desc: "Best prices in the market." },
-              { title: "Fast Delivery", desc: "Fast and safe home delivery." },
-              { title: "24/7 Support", desc: "We are always here to help you." }
-            ].map((feature, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-xl bg-background">
-                <div>
-                  <p className="font-bold text-foreground">{feature.title}</p>
-                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                </label>
-              </div>
-            ))}
-            <button className="w-full py-3 border-2 border-dashed border-border rounded-xl font-semibold text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-              + Add New Feature
-            </button>
-          </div>
-        );
+        return <WhyChooseUsEditor />;
       case "social":
         return <SocialMediaEditor />;
       case "contact":

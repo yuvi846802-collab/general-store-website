@@ -2,68 +2,49 @@ import { motion } from "framer-motion";
 import { ShieldCheck, Tag, MapPin, Smile, Layers, ThumbsUp, Store, Star, ArrowRight, Headphones, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const features = [
+import { useQuery } from "@tanstack/react-query";
+import ApiClient from "@/lib/api";
+
+const defaultFeatures = [
   { 
     id: "01",
     title: "Quality Products", 
-    icon: ShieldCheck, 
-    desc: "We source only the best products for our customers, ensuring freshness and quality.",
-    color: "text-emerald-400",
-    bgLight: "bg-emerald-400/10",
-    borderColor: "border-emerald-400/30",
-    lineGradient: "from-transparent via-emerald-400 to-transparent"
+    icon: "ShieldCheck", 
+    description: "We source only the best products for our customers, ensuring freshness and quality.",
+    color: "text-emerald-400"
   },
   { 
     id: "02",
     title: "Affordable Prices", 
-    icon: Tag, 
-    desc: "Great value for your money. We keep our prices competitive without compromising on quality.",
-    color: "text-amber-400",
-    bgLight: "bg-amber-400/10",
-    borderColor: "border-amber-400/30",
-    lineGradient: "from-transparent via-amber-400 to-transparent"
+    icon: "Tag", 
+    description: "Great value for your money. We keep our prices competitive without compromising on quality.",
+    color: "text-amber-400"
   },
   { 
     id: "03",
     title: "Trusted Local Store", 
-    icon: MapPin, 
-    desc: "A neighborhood staple in Naryawal for years. We're proud to serve our community.",
-    color: "text-teal-400",
-    bgLight: "bg-teal-400/10",
-    borderColor: "border-teal-400/30",
-    lineGradient: "from-transparent via-teal-400 to-transparent"
-  },
-  { 
-    id: "04",
-    title: "Friendly Service", 
-    icon: Smile, 
-    desc: "Always greeted with a smile. Our staff is ready to help you find what you need.",
-    color: "text-blue-400",
-    bgLight: "bg-blue-400/10",
-    borderColor: "border-blue-400/30",
-    lineGradient: "from-transparent via-blue-400 to-transparent"
-  },
-  { 
-    id: "05",
-    title: "Wide Selection", 
-    icon: Layers, 
-    desc: "From daily groceries to household essentials, find everything under one roof.",
-    color: "text-purple-400",
-    bgLight: "bg-purple-400/10",
-    borderColor: "border-purple-400/30",
-    lineGradient: "from-transparent via-purple-400 to-transparent"
-  },
-  { 
-    id: "06",
-    title: "Customer Satisfaction", 
-    icon: ThumbsUp, 
-    desc: "Your happiness is our priority. We go the extra mile to ensure you leave satisfied.",
-    color: "text-green-400",
-    bgLight: "bg-green-400/10",
-    borderColor: "border-green-400/30",
-    lineGradient: "from-transparent via-green-400 to-transparent"
-  },
+    icon: "MapPin", 
+    description: "A neighborhood staple in Naryawal for years. We're proud to serve our community.",
+    color: "text-teal-400"
+  }
 ];
+
+const getIconComponent = (iconName: string | null | undefined) => {
+  const Icons: any = { ShieldCheck, Tag, MapPin, Smile, Layers, ThumbsUp, Store, Star, ArrowRight, Headphones, Phone };
+  const Icon = iconName ? Icons[iconName] : ShieldCheck;
+  return Icon || ShieldCheck;
+};
+
+const getColorStyles = (colorClass: string | null | undefined) => {
+  const baseColor = colorClass || "text-emerald-400";
+  const colorName = baseColor.replace("text-", "").replace("-400", "");
+  return {
+    text: baseColor,
+    bgLight: `bg-${colorName}-400/10`,
+    border: `border-${colorName}-400/30`,
+    gradient: `from-transparent via-${colorName}-400 to-transparent`
+  };
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -79,6 +60,19 @@ const itemVariants = {
 };
 
 export default function WhyChooseUs() {
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['why-choose-us'],
+    queryFn: async () => {
+      const res = await ApiClient.get('/why-choose-us');
+      if (!res.ok) throw new Error('Failed to fetch features');
+      return res.json();
+    }
+  });
+
+  const rawFeatures = response?.data?.length > 0 ? response.data : defaultFeatures;
+  // Filter active features only
+  const features = rawFeatures.filter((f: any) => f.status !== 'INACTIVE');
+
   return (
     <section id="why-us" className="py-24 relative overflow-hidden bg-background text-foreground transition-colors">
       {/* Background Orbs */}
@@ -133,43 +127,52 @@ export default function WhyChooseUs() {
         </div>
         
         <motion.div 
+          key={isLoading ? 'loading' : 'loaded'}
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {features.map((feature, index) => (
-            <motion.div key={index} variants={itemVariants} className="h-full">
-              <div className="relative glass-card rounded-2xl p-8 h-full flex flex-col group hover:bg-accent/50 transition-colors duration-300 overflow-hidden shadow-2xl backdrop-blur-sm">
-                
-                {/* Colored bottom glow line */}
-                <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r opacity-50 transition-opacity group-hover:opacity-100 ${feature.lineGradient}`}></div>
-                
-                {/* Top Row: Icon & Number */}
-                <div className="flex justify-between items-start mb-8">
-                  <div className={`w-14 h-14 rounded-2xl border ${feature.borderColor} ${feature.bgLight} ${feature.color} flex items-center justify-center shadow-lg backdrop-blur-md group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon size={26} strokeWidth={1.5} />
+          {features.map((feature: any, index: number) => {
+            const Icon = getIconComponent(feature.icon);
+            const styles = getColorStyles(feature.color);
+            return (
+              <motion.div key={feature.id || index} variants={itemVariants} className="h-full">
+                <div className="relative glass-card rounded-2xl p-8 h-full flex flex-col group hover:bg-accent/50 transition-colors duration-300 overflow-hidden shadow-2xl backdrop-blur-sm">
+                  
+                  {/* Colored bottom glow line */}
+                  <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r opacity-50 transition-opacity group-hover:opacity-100 ${styles.gradient}`}></div>
+                  
+                  {/* Top Row: Icon & Number */}
+                  <div className="flex justify-between items-start mb-8">
+                    <div className={`w-14 h-14 rounded-2xl border ${styles.border} ${styles.bgLight} ${styles.text} flex items-center justify-center shadow-lg backdrop-blur-md group-hover:scale-110 transition-transform duration-300 overflow-hidden`}>
+                      {feature.image ? (
+                        <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <Icon size={26} strokeWidth={1.5} />
+                      )}
+                    </div>
+                    <div className="text-5xl font-black text-muted-foreground/10 select-none font-heading tracking-tighter group-hover:text-muted-foreground/20 transition-colors duration-300 mt-[-5px]">
+                      {String(index + 1).padStart(2, '0')}
+                    </div>
                   </div>
-                  <div className="text-5xl font-black text-muted-foreground/10 select-none font-heading tracking-tighter group-hover:text-muted-foreground/20 transition-colors duration-300 mt-[-5px]">
-                    {feature.id}
-                  </div>
+                  
+                  {/* Content */}
+                  <h3 className="text-xl font-bold text-foreground mb-3 font-heading tracking-tight">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-8 flex-grow">
+                    {feature.description || feature.desc}
+                  </p>
+                  
+                  {/* Learn More Link */}
+                  <a href="#products" className={`inline-flex items-center gap-2 text-sm font-semibold ${styles.text} group/link hover:opacity-80 transition-opacity`}>
+                    Learn More 
+                    <ArrowRight size={16} className="transition-transform group-hover/link:translate-x-1" />
+                  </a>
                 </div>
-                
-                {/* Content */}
-                <h3 className="text-xl font-bold text-foreground mb-3 font-heading tracking-tight">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-8 flex-grow">
-                  {feature.desc}
-                </p>
-                
-                {/* Learn More Link */}
-                <a href="#products" className={`inline-flex items-center gap-2 text-sm font-semibold ${feature.color} group/link hover:opacity-80 transition-opacity`}>
-                  Learn More 
-                  <ArrowRight size={16} className="transition-transform group-hover/link:translate-x-1" />
-                </a>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* Bottom CTA Bar */}

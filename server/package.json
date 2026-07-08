@@ -24,6 +24,7 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
     "socket.io": "^4.8.3",
+    "ua-parser-js": "^2.0.10",
     "winston": "^3.19.0",
     "zod": "^3.23.8"
   },
@@ -37,6 +38,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^20.19.43",
     "@types/nodemailer": "^8.0.1",
+    "@types/ua-parser-js": "^0.7.39",
     "nodemon": "^3.1.14",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",

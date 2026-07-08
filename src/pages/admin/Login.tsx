@@ -13,9 +13,11 @@ import { useAuth } from "@/context/AuthContext";
 import { authService } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import ApiClient from "@/lib/api";
+import { OtpInput } from "@/components/ui/OtpInput";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
+  identifier: z.string().min(1, { message: "Email or phone number is required" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   rememberMe: z.boolean().optional(),
 });
@@ -28,6 +30,10 @@ export default function AdminLogin() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState(false);
+  const [identifier, setIdentifier] = useState('');
 
   const {
     register,
@@ -37,20 +43,72 @@ export default function AdminLogin() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "yuvrajpaajisardar@gmail.com",
+      identifier: "yuvrajpaajisardar@gmail.com",
       password: "admin123",
       rememberMe: false,
     },
   });
 
-  const emailValue = watch("email");
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+  const identifierValue = watch("identifier");
+  const isIdentifierValid = identifierValue && identifierValue.length > 3;
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onRequestOtp = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const response = await authService.login(data.email, data.password);
-      login(response.user);
+      const res = await ApiClient.post('/auth/login', { identifier: data.identifier, password: data.password });
+      const resData = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(resData.error || resData.message || 'Authentication failed');
+      }
+
+      if (resData.user) {
+        login(resData.user);
+        toast({
+          title: "Welcome back",
+          description: "Successfully logged into the admin dashboard.",
+        });
+        setLocation("/admin/dashboard");
+      } else {
+        setIdentifier(data.identifier);
+        setIsOtpSent(true);
+        toast({ title: "OTP Sent", description: "Please check your email/phone for the OTP." });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Failed",
+        description: error.message || "Invalid credentials",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      setOtpError(true);
+      toast({ variant: "destructive", title: "Error", description: 'OTP must be 6 digits' });
+      return;
+    }
+    
+    setIsLoading(true);
+    setOtpError(false);
+    try {
+      const res = await ApiClient.post('/auth/verify-otp', { 
+        identifier, 
+        purpose: 'LOGIN', 
+        otp 
+      });
+      const resData = await res.json();
+      
+      if (!res.ok) {
+        setOtpError(true);
+        throw new Error(resData.error || resData.message || 'Invalid OTP');
+      }
+
+      login(resData.user);
       toast({
         title: "Welcome back",
         description: "Successfully logged into the admin dashboard.",
@@ -64,6 +122,17 @@ export default function AdminLogin() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onResendOtp = async () => {
+    try {
+      const res = await ApiClient.post('/auth/resend-otp', { identifier, purpose: 'LOGIN' });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || resData.message || 'Failed to resend OTP');
+      toast({ title: "OTP Resent", description: "A new OTP has been sent." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message });
     }
   };
 
@@ -260,25 +329,26 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-foreground">Email Address</label>
-                <div className="relative group">
-                  <input
-                    type="email"
-                    {...register("email")}
-                    className={`w-full bg-background border ${
-                      errors.email ? "border-destructive focus:ring-destructive/20" : "border-input focus:border-teal-500 focus:ring-teal-500/20"
-                    } rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-4 transition-all duration-300 shadow-sm`}
-                    placeholder="yuvrajpaajisardar@gmail.com"
-                  />
-                  {isEmailValid && !errors.email && (
-                    <CheckCircle2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-500" />
-                  )}
+            {!isOtpSent ? (
+              <form onSubmit={handleSubmit(onRequestOtp)} className="space-y-5">
+                
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold text-foreground">Email Address</label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      {...register("identifier")}
+                      className={`w-full bg-background border ${
+                        errors.identifier ? "border-destructive focus:ring-destructive/20" : "border-input focus:border-teal-500 focus:ring-teal-500/20"
+                      } rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-4 transition-all duration-300 shadow-sm`}
+                      placeholder="yuvrajpaajisardar@gmail.com"
+                    />
+                    {isIdentifierValid && !errors.identifier && (
+                      <CheckCircle2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-500" />
+                    )}
+                  </div>
+                  {errors.identifier && <p className="text-destructive text-xs font-medium mt-1">{errors.identifier.message}</p>}
                 </div>
-                {errors.email && <p className="text-destructive text-xs font-medium mt-1">{errors.email.message}</p>}
-              </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -345,6 +415,49 @@ export default function AdminLogin() {
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
               </button>
             </form>
+            ) : (
+            <form onSubmit={onVerifyOtp} className="space-y-6">
+              <div className="space-y-4 text-center">
+                <label className="text-sm text-muted-foreground font-medium">
+                  We sent a secure code to<br/>
+                  <strong className="text-foreground">{identifier}</strong>
+                </label>
+                <div className="pt-2 flex justify-center">
+                  <OtpInput value={otp} onChange={setOtp} error={otpError} disabled={isLoading} />
+                </div>
+              </div>
+              
+              <div className="space-y-4 mt-8">
+                <button
+                  type="submit"
+                  disabled={isLoading || otp.length !== 6}
+                  className="w-full relative overflow-hidden bg-teal-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:bg-teal-700 hover:shadow-[0_0_20px_rgba(13,148,136,0.4)] hover:scale-[1.01] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed group shadow-md"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      Verify & Login
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
+                </button>
+                
+                <div className="flex justify-between text-sm mt-4">
+                  <button type="button" className="text-muted-foreground hover:text-foreground font-medium transition-colors" onClick={() => setIsOtpSent(false)} disabled={isLoading}>
+                    Change Email
+                  </button>
+                  <button type="button" className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold transition-colors" onClick={onResendOtp} disabled={isLoading}>
+                    Resend Code
+                  </button>
+                </div>
+              </div>
+            </form>
+            )}
 
           </div>
           

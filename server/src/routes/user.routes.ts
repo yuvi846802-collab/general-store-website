@@ -6,7 +6,11 @@ import {
   revokeSession, 
   revokeAllSessions,
   getAllUsers,
-  uploadAvatar
+  uploadAvatar,
+  requestEmailChange,
+  verifyEmailChange,
+  requestPhoneChange,
+  verifyPhoneChange
 } from '../controllers/user.controller';
 import { requireAuth, requireAdmin } from '../middlewares/auth.middleware';
 import multer from 'multer';
@@ -54,6 +58,11 @@ router.use(requireAuth);
 router.post('/avatar', upload.single('image'), uploadAvatar);
 router.put('/profile', updateProfile);
 router.put('/update-password', updatePassword);
+
+router.post('/request-email-change', requestEmailChange);
+router.post('/verify-email-change', verifyEmailChange);
+router.post('/request-phone-change', requestPhoneChange);
+router.post('/verify-phone-change', verifyPhoneChange);
 
 router.get('/sessions', getSessions);
 router.delete('/sessions/:id', revokeSession);

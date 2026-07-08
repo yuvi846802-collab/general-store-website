@@ -79,25 +79,55 @@ class ApiClient {
   }
 
   static async post(url: string, body: any, options?: RequestInit) {
+    const isFormData = body instanceof FormData;
+    const headers: Record<string, string> = { ...options?.headers } as Record<string, string>;
+    
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     return this.handleRequest(url, {
       ...options,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(body),
+      headers,
+      body: isFormData ? body : JSON.stringify(body),
     });
   }
 
   static async put(url: string, body: any, options?: RequestInit) {
+    const isFormData = body instanceof FormData;
+    const headers: Record<string, string> = { ...options?.headers } as Record<string, string>;
+    
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     return this.handleRequest(url, {
       ...options,
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      body: JSON.stringify(body),
+      headers,
+      body: isFormData ? body : JSON.stringify(body),
     });
   }
 
   static async delete(url: string, options?: RequestInit) {
     return this.handleRequest(url, { ...options, method: 'DELETE' });
+  }
+
+  static async patch(url: string, body?: any, options?: RequestInit) {
+    const headers: Record<string, string> = { ...((options?.headers as any) || {}) };
+    const isFormData = body instanceof FormData;
+    
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    return this.handleRequest(url, {
+      ...options,
+      method: 'PATCH',
+      headers,
+      body: isFormData ? body : JSON.stringify(body),
+    });
   }
 }
 

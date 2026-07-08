@@ -1,21 +1,24 @@
 export interface User {
   id: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  name?: string | null;
   email: string;
-  phone?: string;
+  phone?: string | null;
   role: string;
-  avatar?: string;
-  profileImage?: string;
+  avatar?: string | null;
+  profileImage?: string | null;
   isVerified?: boolean;
-  bio?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  timezone?: string;
-  language?: string;
-  createdAt: Date;
+  bio?: string | null;
+  country?: string | null;
+  state?: string | null;
+  city?: string | null;
+  address?: string | null;
+  timezone?: string | null;
+  language?: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | Date | null;
+  createdAt?: Date | string;
 }
 
 export interface Category {
