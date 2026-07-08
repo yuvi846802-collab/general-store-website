@@ -8,10 +8,17 @@ export const updateProfile = catchAsync(async (req: Request, res: Response, next
   const { firstName, lastName, phone, profileImage, bio, country, state, city, timezone, language, email } = req.body;
   const userId = req.user?.id;
 
-  const dataToUpdate: any = { phone };
+  const dataToUpdate: any = {};
+  if (phone !== undefined) {
+    dataToUpdate.phone = phone === "" ? null : phone;
+  }
+  
   if (firstName && lastName) dataToUpdate.name = `${firstName} ${lastName}`;
-  if (firstName) dataToUpdate.firstName = firstName;
-  if (lastName) dataToUpdate.lastName = lastName;
+  else if (firstName && !lastName) dataToUpdate.name = firstName;
+  else if (!firstName && lastName) dataToUpdate.name = lastName;
+
+  if (firstName !== undefined) dataToUpdate.firstName = firstName;
+  if (lastName !== undefined) dataToUpdate.lastName = lastName;
   
   if (email) {
     // Check if email already exists for another user
