@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Store, Phone, Menu, X, Search, User, ShoppingCart, ChevronDown, Package, Box, Tag, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -197,8 +198,14 @@ export default function Navbar() {
               onClick={() => setLocation('/profile')}
               className="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 border border-transparent hover:border-border"
             >
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase shrink-0">
-                {user.name ? user.name.charAt(0) : (user.email ? user.email.charAt(0) : <User size={14} />)}
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase shrink-0 overflow-hidden">
+                {user.profileImage ? (
+                  <img src={getImageUrl(user.profileImage)} alt={user.name || 'User'} className="w-full h-full object-cover" />
+                ) : user.name ? (
+                  user.name.charAt(0)
+                ) : (
+                  user.email ? user.email.charAt(0) : <User size={14} />
+                )}
               </div>
               <span className="text-sm font-semibold hidden sm:block max-w-[100px] truncate">
                 {user.name || user.email.split('@')[0]}

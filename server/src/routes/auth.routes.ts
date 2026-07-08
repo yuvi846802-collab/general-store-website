@@ -1,29 +1,29 @@
 import { Router } from 'express';
 import { 
-  register, 
-  login, 
-  logout, 
-  refresh, 
-  forgotPassword, 
+  signup,
+  login,
+  sendOtp,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
   resetPassword,
-  verifyEmail,
-  resendVerification,
-  getMe
+  logout, 
+  refresh
 } from '../controllers/auth.controller';
-import { requireAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.post('/register', register);
+router.post('/signup', signup);
 router.post('/login', login);
-router.post('/logout', logout);
-router.post('/refresh', refresh);
+router.post('/send-otp', sendOtp);
+router.post('/verify-otp', verifyOtp);
+router.post('/resend-otp', resendOtp);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerification);
 
-// Protected routes
-router.get('/me', requireAuth, getMe);
+router.post('/logout', logout);
+router.post('/refresh', refresh);
+
+// Note: /change-email and /change-phone are in user.routes.ts (protected)
 
 export default router;

@@ -68,6 +68,7 @@ import userRoutes from './routes/user.routes';
 import uploadRoutes from './routes/upload.routes';
 import orderRoutes from './routes/order.routes';
 import inventoryRoutes from './routes/inventory.routes';
+import whyChooseUsRoutes from './routes/why-choose-us.routes';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -79,6 +80,7 @@ app.use('/api/hero', heroRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/why-choose-us', whyChooseUsRoutes);
 
 // Health Check
 app.get(['/health', '/api/health'], (req, res) => {

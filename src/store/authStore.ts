@@ -2,17 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import ApiClient from '../lib/api';
 
-interface User {
-  id: string;
-  name: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string;
-  phone: string | null;
-  role: string;
-  profileImage: string | null;
-  isVerified: boolean;
-}
+import { User } from '../types';
 
 interface AuthState {
   user: User | null;

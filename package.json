@@ -79,11 +79,15 @@
     "zod": "latest"
   },
   "dependencies": {
+    "browser-image-compression": "^2.0.2",
+    "country-state-city": "^3.2.1",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "papaparse": "^5.5.4",
+    "react-easy-crop": "^6.2.2",
     "socket.io-client": "^4.8.3",
     "swiper": "^14.0.1",
+    "ua-parser-js": "^2.0.10",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.14"
   }
